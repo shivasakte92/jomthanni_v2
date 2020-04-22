@@ -1,0 +1,44 @@
+<ion-view title="Checkout"  id="page11" >
+  <ion-content padding="true" class="no-header background">
+    <br>
+    <br>
+    <form name="checkoutForm" class="list " ng-submit="pay(address_choice,pay_choice,phone_choice)" >
+      <!-- Address -->
+      <label ng-click="chooseLocation()" class="item item-input  item ic-selected" >
+        <a class="icon icon-right ion-ios-location" style="margin-right: 10px;" ></a>
+        Choose Location
+      </label>
+      <ion-list ng-repeat="item in addresses" >
+        <ion-radio name="addr_group" ng-value="item" ng-model="$parent.address_choice">
+          <a></a>
+          {{item.address}} | {{item.postcode}} <br/>
+        </ion-radio>
+      </ion-list>
+
+      <label ng-click="addManipulation()" class="item item-input  item ic-selected" >
+        <a class="icon icon-right ion-ios-location" style="margin-right: 10px;" ></a>
+        Choose Number
+      </label>
+      <ion-list ng-repeat="item in phone" >
+        <ion-radio name="phone_group" ng-value="item.phone" ng-model="$parent.phone_choice">
+          <a></a>
+          {{item.phone}} <br/>
+        </ion-radio>
+      </ion-list>
+
+
+      <!--Payment Header-->
+      <label class="item item-input  item ic-selected" >
+        <a class="icon icon-right ion-cash" style="margin-right: 10px;" ></a>
+        Mode of Pay
+      </label>
+      <!-- Payment Options -->
+      <ion-list  ng-repeat="item in payments">
+        <ion-radio name="pay_group" ng-value="item.id" ng-model="$parent.pay_choice" > {{item.name}} </ion-radio>
+      </ion-list>
+      <button ng-click="makePayment()" type="submit" class="button button-assertive button-block icon-right ion-android-arrow-forward ">
+        PAY
+      </button>
+    </form>
+  </ion-content>
+</ion-view>

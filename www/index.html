@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+  <title></title>
+<!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
+<link href="css/ionic.app.css" rel="stylesheet">
+-->
+<script src="lib/jquery/dist/jquery.min.js"></script>
+<script src="lib/ionic/js/ionic.bundle.js"></script>
+<!-- cordova script (this will be a 404 during development) -->
+<script src="lib/ngCordova/dist/ng-cordova.js"></script>
+<link href="lib/ionic/css/ionic.css" rel="stylesheet">
+<!--=========================================#1. Custom Header Part====================================-->
+<!-- Ionic Meterial Header-->
+<script src="lib/ionic-material/dist/ionic.material.min.js"></script>
+<script src="lib/ionicuirouter/ionicUIRouter.js"></script>
+<link href="lib/ionic-material/dist/ionic.material.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=RobotoDraft%3A400%2C500%2C700%2C400italic" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArCt0qZQxsIu5HzXb1c34Ah7Vzx6JZw_w&callback=angular.noop"
+  type="text/javascript"></script>
+<!--Firebase Header-->
+<script src="https://cdn.firebase.com/js/client/2.2.4/firebase.js"></script>
+<script src="https://cdn.firebase.com/libs/angularfire/1.2.0/angularfire.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.7.3/firebase.js"></script>
+<!-- includes the Braintree JS client SDK -->
+<script src="https://js.braintreegateway.com/web/dropin/1.15.0/js/dropin.min.js"></script>
+<script src="https://js.braintreegateway.com/js/braintree-2.23.0.min.js"></script>
+<script src="https://js.braintreegateway.com/js/braintree-2.32.1.min.js"></script>
+<!-- includes jQuery -->
+<script src="http://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+<script src="https://smtpjs.com/v3/smtp.js"></script>
+<script src="cordova.js"></script>
+<script>
+// Initialize Firebase
+var config = {
+  apiKey: "AIzaSyBi1fWjQsnsuVAsP8o15A7FReeCO1xTD8M",
+  authDomain: "production-app-9ed98.firebaseapp.com",
+  databaseURL: "https://production-app-9ed98.firebaseio.com",
+  projectId: "production-app-9ed98",
+  storageBucket: "production-app-9ed98.appspot.com",
+  messagingSenderId: "928166171170"
+};
+firebase.initializeApp(config);
+</script>
+
+<script src="js/app.js"></script>
+<script src="js/controllers.js"></script>
+<script src="js/routes.js"></script>
+<script src="js/services.js"></script>
+<script src="js/directives.js"></script>
+
+</head>
+<body ng-app="app" animation="slide-left-right-ios7">
+  <div style="color:#2e5658">
+    <!--#5. indexCtrl -->
+    <ion-side-menus ng-controller="indexCtrl" side-menu-content drag-content="false" data-componentid="side-menu21" style="" enable-menu-with-back-views="false">
+      <ion-side-menu-content drag-content="false">
+        <ion-nav-bar class="bar-light" style="color:red">
+          <ion-nav-back-button></ion-nav-back-button>
+          <ion-nav-buttons side="left">
+            <!-- #3.  $root.extras -->
+            <button ng-if="$root.extras" class="button button-icon button-clear ion-navicon" style="" menu-toggle="left">
+            </button>
+          </ion-nav-buttons>
+          <ion-nav-buttons side="right">
+            <!-- #3.  $root.extras -->
+            <!-- #4.  get_total() -->
+            <button ui-sref="myCart" ng-if="$root.extras" class="button button-icon button-clear ion-ios-cart-outline" style="">
+              {{get_total()}}
+            </button>
+          </ion-nav-buttons>
+        </ion-nav-bar>
+        <ion-nav-view></ion-nav-view>
+      </ion-side-menu-content>
+      <!-- #3.  $root.extras -->
+      <ion-side-menu side="left" drag-content="false" id="side-menu21" ng-if="$root.extras" class="mymenu2">
+        <!-- <ion-header-bar class="light-bg header-bar-big">
+        <div class="panel">
+        <div class="user-heading round">
+          <img ng-src="{{&apos;img/fk/default_dp.JPG&apos;}}" class="avatar motion spin fade">
+          </div>
+          </div>
+          <div class="menu-bottom">
+            {{user_info.displayName}}
+          </div>
+        </ion-header-bar> -->
+        <div class="panel">
+        <div class="user-heading round">
+          <img ng-src="{{avatar}}" class="avatar motion spin fade">
+          </div>
+          </div>
+        <ion-content class="has-expanded-header">
+          <ion-list data-componentid="list1" class=" " id="menu-list1">
+          <ion-item style="color:white" class="item-icon-center">
+              <i class="item-icon-center"></i><b><p style="color:white;font-family:profile_name;font-size: 20px;text-align:center;">{{user_info.displayName}}</p></b></ion-item>
+            <ion-item data-componentid="list-item1" style="color:white" menu-close="" ui-sref="menu2" id="menu-list-item1" class="item-icon-left  ">
+              <i class="icon ion-ios-home-outline"></i>Menu</ion-item>
+                <ion-item data-componentid="list-item8" style="color:white" menu-close="" ui-sref="myCart" id="menu-list-item8" class="item-icon-left  ">
+                  <i class="icon ion-ios-cart-outline"></i>My Cart</ion-item>
+                  <ion-item data-componentid="list-item3" style="color:white" menu-close="" ui-sref="lastOrders" id="menu-list-item3" class="item-icon-left  ">
+                    <i class="icon ion-ios-clock-outline"></i>Orders</ion-item>
+                      <ion-item data-componentid="list-item5" style="color:white" menu-close="" ui-sref="settings" id="menu-list-item5" class="item-icon-left  ">
+                        <i class="icon ion-ios-gear-outline"></i>Settings</ion-item>
+                          <ion-item data-componentid="list-item5" style="color:white" menu-close="" ui-sref="support" id="menu-list-item5" class="item-icon-left  ">
+                            <i class="icon ion-ios-email"></i>Support</ion-item>
+                              <ion-item ng-click="logout()" data-componentid="list-item7" style="color:white" id="menu-list-item7" class="item-icon-left  ">
+                                <i class="icon ion-log-out"></i>Logout</ion-item>
+                          </ion-list>
+                        </ion-content>
+                      </ion-side-menu>
+                    </ion-side-menus>
+                  </div>
+                </body>
+                </html>

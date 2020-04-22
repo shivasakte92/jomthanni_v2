@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "928166171170",
+    "firebase_url": "https://production-app-9ed98.firebaseio.com",
+    "project_id": "production-app-9ed98",
+    "storage_bucket": "production-app-9ed98.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:928166171170:android:a3acefbf48b4c50a56b07b",
+        "android_client_info": {
+          "package_name": "com.jomthanni.krishnaminimart"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "928166171170-8v7jgog9f311v7rnv0iitjq301mcdp21.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaX2iVH-MVgNgfA5OsvCLaxafk3XzaOLU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "928166171170-8v7jgog9f311v7rnv0iitjq301mcdp21.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

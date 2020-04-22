@@ -1,0 +1,37 @@
+<ion-view style="" class=" " id="page13" title="Spirits">
+	<ion-content class="no-header background" padding="false" ng-init="loadMenu()">
+		<br>
+		<br><br>
+		<div class="row"> 
+			<div class="column">
+				<div style="width:image width px; font-size:80%; font-weight:bold; text-align:center;">
+					<div ng-repeat="item in left">
+						<img src="{{item.URL}}" style="width:100%;border-radius: 8px;">
+						{{item.item_name}}
+						<a class="item item-icon-right assertive" href="javascript:void(0)"  style="border-width: 0px; border-style: none;" >
+							<p style="font-size: 12px;text-align:left;">
+								<span style="font-weight: bold;color: black;">RM {{left[$index].price}}</span>
+							</p>
+							<i style="font-size: 25px; margin-right:0px;right:0px;"  ng-click="addToCart(left[$index])" class="icon ion-ios-cart"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+			<div class="column">
+				<div style="width:image width px; font-size:80%; font-weight:bold; text-align:center;">
+					<div ng-repeat="item in right">
+						<img src="{{item.URL}}" style="width:100%;border-radius: 8px;">
+						{{item.item_name}}
+						<a class="item item-icon-right assertive" href="javascript:void(0)"  style="border-width: 0px; border-style: none;" >
+							<p style="font-size: 12px;text-align:left;">
+								<span style="font-weight: bold;color: black;">RM {{item.price}}</span>
+							</p>
+							<i style="font-size: 25px; margin-right:0px;right:0px;"  ng-click="addToCart(right[$index])" class="icon ion-ios-cart"></i>
+						</a>
+					</div>
+				</div>
+				<br>
+			</div>  
+		</div>
+	</ion-content>
+</ion-view>

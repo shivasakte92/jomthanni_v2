@@ -1,0 +1,69 @@
+<ion-view style="" class="" id="page4">
+  <ion-nav-title class="MyFont">
+    <span>Jom Thanni</span>
+  </ion-nav-title>
+  <ion-content class="background" style="" padding="false" ng-init="loadMenu()">
+  </br>
+  <h4 style="padding-left: 10px;">Category</h4>
+
+  <ion-scroll direction="x" class="wide-as-needed">
+    <div style="display: inline-block;white-space: nowrap; ">
+      <img src="img/latest2/whisky.jpg" ui-sref="spirits" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;"">
+      <img src="img/latest2/beer.jpg" ui-sref="beers" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;"">
+      <img src="img/latest2/tobacco.jpg" ui-sref="tobacco" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;"">
+      <img src="img/latest2/wine.jpg" ui-sref="wine" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;"">
+      <img src="img/latest2/accessories.jpg" ui-sref="accessories" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;"">
+      <img src="img/latest2/others.jpg" ui-sref="others" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;"">
+    </div>
+  </ion-scroll>
+
+  <h4 style="padding-left: 10px;">Promotions</h4>
+
+  <ion-scroll direction="x" class="wide-as-needed">
+    <div ng-repeat="item in promotions" style="display: inline-block;white-space: nowrap; ">
+      <img ng-src="{{item.URL}}" style="margin: 10px; display: inline-block;">
+    </div>
+  </ion-scroll>
+
+  <!-- <ion-slide-box slide-intervel='30000'>
+  <ion-slide ng-repeat="item in promotions">
+  <img ng-src="{{item.URL}}" style="width:100%;height:100%;"/>
+</ion-slide>
+</ion-slide-box> -->
+
+<div class="row">
+  <div class="column">
+    <div style="width:image width px; font-size:80%; font-weight:bold; text-align:center;">
+      <img src="img/latest4/spirits.png" ui-sref="spirits" style="width:100%">
+      SPIRITS
+    </div>
+    <br>
+    <div style="width:image width px; font-size:80%; font-weight:bold; text-align:center;">
+      <img src="img/latest4/beer.png" ui-sref="beers" style="width:100%">
+      BEERS
+    </div>
+    <br>
+    <div style="width:image width px; font-size:80%; font-weight:bold; text-align:center;">
+      <img src="img/latest4/gin.png" ui-sref="others" style="width:100%">
+      OTHERS
+    </div>
+  </div>
+  <div class="column">
+    <div style="width:image width px; font-size:80%; font-weight:bold; text-align:center;">
+      <img src="img/latest4/tobacco2.png" ui-sref="tobacco" style="width:100%">
+      TOBACCO
+    </div>
+    <br>
+    <div style="width:image width px; font-size:80%; font-weight:bold; text-align:center;">
+      <img src="img/latest4/wine.png" ui-sref="wine" style="width:100%">
+      WINES
+    </div>
+    <br>
+    <div style="width:image width px; font-size:80%; font-weight:bold; text-align:center;">
+      <img src="img/latest4/tequila.png" ui-sref="accessories" style="width:100%">
+      ACCESSORIES
+    </div>
+  </div>
+</div>
+</ion-content>
+</ion-view>
