@@ -289,6 +289,35 @@ $scope.loginGmail = function(){
 
       }
 
+      function loadAnnouncements(){
+        firebase.database().ref('announcements').on('value', function(_snapshot){
+
+          result = [];
+
+          _snapshot.forEach(function (childSnapshot){
+            // console.log(childSnapshot);
+            var element = childSnapshot.val();
+            element.id = childSnapshot.key;
+            result.push(element);
+            // console.log(element);
+          });
+
+          $timeout(function(){
+            console.log(result);
+            $scope.announcements = result;
+            $state.transitionTo($state.current, $stateParams, {
+              reload: true,
+              inherit: false,
+              notify: true
+            });
+            sharedUtils.hideLoading();
+          }, 1000);
+
+        });
+      }
+
+      loadAnnouncements();
+
       $scope.showProductInfo=function (id) {
 
       };
@@ -340,7 +369,7 @@ $scope.loginGmail = function(){
     $rootScope.extras=true;
 })
 
-.controller('indexCtrl', function($scope,$rootScope,sharedUtils,$ionicHistory,$state,$ionicSideMenuDelegate,sharedCartService) {
+.controller('indexCtrl', function($scope,$rootScope,sharedUtils,$ionicHistory,$state,$ionicSideMenuDelegate,sharedCartService,$timeout) {
 
 
 
@@ -407,6 +436,11 @@ $scope.loginGmail = function(){
       sharedUtils.showAlert("Error","Logout Failed")
     });
 
+    $timeout(function () {
+        $ionicHistory.clearCache();
+        $ionicHistory.clearHistory();
+    }, 1500)
+
   }
 
 })
@@ -461,7 +495,7 @@ $scope.loginGmail = function(){
       firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
 
-        if ($scope.total_amount>=50){
+        if ($scope.total_amount+10>=50){
 
         $state.go('checkout', {}, {location: "replace"});
 
@@ -489,20 +523,24 @@ $scope.loginGmail = function(){
   firebase.auth().onAuthStateChanged(function (user) {
     if (user) {
       $scope.user_info = user;
+      // console.log(user);
 
       function loadData(){
-        firebase.database().ref('orders').orderByChild('user_id').startAt($scope.user_info.uid).endAt($scope.user_info.uid).on('value', function(_snapshot){
+        firebase.database().ref('orders').child(user.uid).on('value', function(_snapshot){
 
           result = [];
 
           _snapshot.forEach(function (childSnapshot){
+            // console.log(childSnapshot);
             var element = childSnapshot.val();
             element.id = childSnapshot.key;
             result.push(element);
+            // console.log(element);
           });
 
           $timeout(function(){
-            $scope.assetCollection = result;
+            console.log(result);
+            $scope.assetCollection = result.reverse();
             $state.transitionTo($state.current, $stateParams, {
               reload: true,
               inherit: false,
@@ -519,11 +557,63 @@ $scope.loginGmail = function(){
     }
   });
 
+  $scope.viewOrder = function(id){
+
+    console.log("Here");
+    console.log(id);
+    $state.go('viewOrder', {"id":id}, {location: "replace"});
+  }
+
 })
 
 .controller('favouriteCtrl', ['$scope', '$rootScope', '$http', function($scope,$rootScope,$http) {
 
 }])
+
+.controller('viewOrderCtrl', function($scope,$rootScope,$http,sharedUtils,$state,$stateParams,$timeout) {
+
+  $rootScope.extras = true;
+  sharedUtils.showLoading();
+  var id = $stateParams.id;
+
+firebase.auth().onAuthStateChanged(function (user) {
+    if (user) {
+      $scope.user_info = user;
+
+  function loadData(){
+        firebase.database().ref('orders').child(user.uid).child(id).on('value', function(_snapshot){
+
+          result = [];
+
+          _snapshot.forEach(function (childSnapshot){
+            // console.log(childSnapshot);
+            var element = childSnapshot.val();
+            element.id = childSnapshot.key;
+            result.push(element);
+            // console.log(element);
+          });
+
+          $timeout(function(){
+            console.log(result);
+            $scope.assetCollection = result;
+            $state.transitionTo($state.current, $stateParams, {
+              reload: true,
+              inherit: false,
+              notify: true
+            });
+            sharedUtils.hideLoading();
+          }, 1000);
+
+        });
+      }
+
+      loadData();
+
+    }
+
+  });
+
+})
 
 .controller('settingsCtrl', function($scope,$rootScope,fireBaseData,$firebaseObject,
                                      $ionicPopup,$state,$window,$firebaseArray,
@@ -753,16 +843,22 @@ $scope.loginGmail = function(){
           if(postCode[i].postcode == address.postcode){
             sharedUtils.showLoading();
 
+            var newOrderRef = fireBaseData.refOrder().child($scope.user_info.uid).push();
+            var timestamp = new Date().getTime();
+            var total_price = 10;
+
             for (var i = 0; i < sharedCartService.cart_items.length; i++) {
                   //Add cart item to order table
                   // fireBaseData.refOrder().child($scope.user_info.uid).push({
-                    fireBaseData.refOrder().push({
+                    newOrderRef.push({
 
                     //Product data is hardcoded for simplicity
                     product_name: sharedCartService.cart_items[i].item_name,
                     product_price: sharedCartService.cart_items[i].item_price,
                     product_image: sharedCartService.cart_items[i].item_image,
                     product_id: sharedCartService.cart_items[i].$id,
+                    total_price: sharedCartService.cart_items[i].item_price*sharedCartService.cart_items[i].item_qty,
+                    time: timestamp,
 
                     //item data
                     item_qty: sharedCartService.cart_items[i].item_qty,
@@ -775,20 +871,27 @@ $scope.loginGmail = function(){
                     status: "Queued"
                   });
 
+                    total_price = total_price+(sharedCartService.cart_items[i].item_price*sharedCartService.cart_items[i].item_qty);
+
                 }
 
+                newOrderRef.update({
+                  date: timestamp,
+                  total_price: total_price
+                })
+
                 // $scope.sendEmail = function() {
-                    Email.send({
-                    Host: "smtp.gmail.com",
-                    Username : "minimart.krishna@gmail.com",
-                    Password : "gunanantha",
-                    To : 'minimart.krishna@gmail.com',
-                    From : "admin@minimart-krishna.com.my",
-                    Subject : "New Order Received",
-                    Body : "New order received, please check on the management app and accept the orders",
-                    }).then(
-                      // message => alert("mail sent successfully")
-                    );
+                    // Email.send({
+                    // Host: "smtp.gmail.com",
+                    // Username : "minimart.krishna@gmail.com",
+                    // Password : "gunanantha",
+                    // To : 'minimart.krishna@gmail.com',
+                    // From : "admin@minimart-krishna.com.my",
+                    // Subject : "New Order Received",
+                    // Body : "New order received, please check on the management app and accept the orders",
+                    // }).then(
+                    //   // message => alert("mail sent successfully")
+                    // );
                   // }
 
                 //Remove users cart

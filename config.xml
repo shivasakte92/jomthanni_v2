@@ -9,6 +9,8 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
+    <access launch-external="yes" origin="tel:*" />
+    <access launch-external="yes" origin="mailto:*" />
     <preference name="android-targetSdkVersion" value="23" />
     <preference name="webviewbounce" value="false" />
     <preference name="UIWebViewBounce" value="false" />
@@ -79,5 +81,6 @@
         <variable name="FACEBOOK_HYBRID_APP_EVENTS" value="false" />
         <variable name="FACEBOOK_ANDROID_SDK_VERSION" value="5.13.0" />
     </plugin>
+    <plugin name="cordova-plugin-x-toast" spec="^2.7.2" />
     <engine name="android" spec="8.0.0" />
 </widget>

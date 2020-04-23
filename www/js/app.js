@@ -12,7 +12,7 @@ angular.module('app', ['ionic', 'ngCordova', 'app.controllers', 'app.routes', 'a
     $ionicConfigProvider.scrolling.jsScrolling(false);
     $ionicConfigProvider.tabs.position('bottom'); // other values: top
 })
-.run(function($ionicPlatform,$rootScope,sharedUtils) {
+.run(function($rootScope,$ionicPlatform,$ionicHistory,$rootScope,sharedUtils) {
 
     $rootScope.extras = false;
 
@@ -68,10 +68,33 @@ angular.module('app', ['ionic', 'ngCordova', 'app.controllers', 'app.routes', 'a
     if (window.StatusBar) {
       // org.apache.cordova.statusbar required
        StatusBar.styleLightContent();
-       StatusBar.overlaysWebView(true);
+       // StatusBar.overlaysWebView(true);
        StatusBar.backgroundColorByHexString("#2e5658");
        // ionic.Platform.fullScreen();
     }
 
   });
+
+        $ionicPlatform.registerBackButtonAction(function(e){
+    if ($rootScope.backButtonPressedOnceToExit) {
+      ionic.Platform.exitApp();
+    }
+
+    else if ($ionicHistory.backView()) {
+      $ionicHistory.goBack();
+    }
+    else {
+      $rootScope.backButtonPressedOnceToExit = true;
+      window.plugins.toast.showShortCenter(
+        "Press back button again to exit",function(a){},function(b){}
+      );
+      setTimeout(function(){
+        $rootScope.backButtonPressedOnceToExit = false;
+      },2000);
+    }
+    e.preventDefault();
+    return false;
+  },101);
+
+
 })

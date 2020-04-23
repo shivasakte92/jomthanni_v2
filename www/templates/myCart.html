@@ -2,10 +2,12 @@
   <ion-content class="no-header background" padding="true">
     <br>
     <br>
-    <!-- <br> -->
     <div>
       <p>Total ( {{get_qty()}} ) =
         <strong> RM {{total_amount}}</strong>
+      </p>
+      <p>Delivery ( RM 10 ) =
+        <strong> RM {{total_amount+10}}</strong>
       </p>
     </div>
     <button ng-click="checkout()" class="button button-assertive button-block ">Check Out</button>

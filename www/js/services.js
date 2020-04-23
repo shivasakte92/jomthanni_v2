@@ -113,10 +113,18 @@ angular.module('app.services', [])
           var currentQty = snapshot.child(item.id).val().item_qty;
 
           fireBaseData.refCart().child(uid).child(item.id).update({   // update
-            item_qty : currentQty+1
+            item_qty : currentQty+1,
+            item_total_price: (item.price*(currentQty+1))
           });
 
         }else{
+
+          var alertPopup = $ionicPopup.alert({
+             title: 'Item Added!',
+             template: 'You can view them in your cart'
+           });
+           alertPopup.then(function(res) {
+           });
 
           //if item is new in the cart
           fireBaseData.refCart().child(uid).child(item.id).set({    // set
@@ -124,6 +132,7 @@ angular.module('app.services', [])
             item_image: item.URL,
             item_price: item.price,
             item_qty: 1,
+            item_total_price: (item.price*1),
             user: firebase.auth().currentUser.email
           });
         }
@@ -141,9 +150,11 @@ angular.module('app.services', [])
         if( snapshot.hasChild(item_id) == true ){
 
           var currentQty = snapshot.child(item_id).val().item_qty;
+          var item_price = snapshot.child(item_id).val().item_price;
           //check if currentQty+1 is less than available stock
           fireBaseData.refCart().child(uid).child(item_id).update({
-            item_qty : currentQty+1
+            item_qty : currentQty+1,
+            item_total_price: (item_price*(currentQty+1))
           });
 
         }else{
@@ -160,12 +171,14 @@ angular.module('app.services', [])
         if( snapshot.hasChild(item_id) == true ){
 
           var currentQty = snapshot.child(item_id).val().item_qty;
+          var item_price = snapshot.child(item_id).val().item_price;
 
           if( currentQty-1 <= 0){
             cart.drop(item_id);
           }else{
             fireBaseData.refCart().child(uid).child(item_id).update({
-              item_qty : currentQty-1
+              item_qty : currentQty-1,
+              item_total_price: (item_price*(currentQty-1))
             });
           }
 

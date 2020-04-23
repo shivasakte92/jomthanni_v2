@@ -8,29 +8,31 @@
 
   <ion-scroll direction="x" class="wide-as-needed">
     <div style="display: inline-block;white-space: nowrap; ">
-      <img src="img/latest2/whisky.jpg" ui-sref="spirits" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;"">
-      <img src="img/latest2/beer.jpg" ui-sref="beers" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;"">
-      <img src="img/latest2/tobacco.jpg" ui-sref="tobacco" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;"">
-      <img src="img/latest2/wine.jpg" ui-sref="wine" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;"">
-      <img src="img/latest2/accessories.jpg" ui-sref="accessories" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;"">
-      <img src="img/latest2/others.jpg" ui-sref="others" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;"">
+      <img src="img/latest2/whisky.jpg" ui-sref="spirits" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;">
+      <img src="img/latest2/beer.jpg" ui-sref="beers" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;">
+      <img src="img/latest2/tobacco.jpg" ui-sref="tobacco" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;">
+      <img src="img/latest2/wine.jpg" ui-sref="wine" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;">
+      <img src="img/latest2/accessories.jpg" ui-sref="accessories" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;">
+      <img src="img/latest2/others.jpg" ui-sref="others" style="margin: 10px; height:150px; width:auto; display: inline-block; border-radius: 8px;">
     </div>
   </ion-scroll>
+
+  <h4 style="padding-left: 10px;">Announcements</h4>
+
+    <ion-slide-box slide-intervel='30000' auto-play="true">
+    <ion-slide ng-repeat="item in announcements">
+    <img ng-src="{{item.URL}}" style="width:100%;height:100%;"/>
+    </ion-slide>
+    </ion-slide-box>
 
   <h4 style="padding-left: 10px;">Promotions</h4>
 
   <ion-scroll direction="x" class="wide-as-needed">
     <div ng-repeat="item in promotions" style="display: inline-block;white-space: nowrap; ">
-      <img ng-src="{{item.URL}}" style="margin: 10px; display: inline-block;">
+      <img ng-src="{{item.URL}}" style="margin: 10px; height:350px; width:auto; display: inline-block; border-radius: 8px;">
     </div>
   </ion-scroll>
-
-  <!-- <ion-slide-box slide-intervel='30000'>
-  <ion-slide ng-repeat="item in promotions">
-  <img ng-src="{{item.URL}}" style="width:100%;height:100%;"/>
-</ion-slide>
-</ion-slide-box> -->
-
+  
 <div class="row">
   <div class="column">
     <div style="width:image width px; font-size:80%; font-weight:bold; text-align:center;">

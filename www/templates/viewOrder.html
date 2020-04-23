@@ -1,23 +1,30 @@
-<ion-view style="" class=" " id="page7" title="Orders">
+<ion-view style="" class=" " id="page20" title="View Orders">
   <ion-content class="no-header background" padding="true">
     <br>
     <br>
     <!-- <br> -->
-    <ion-list>
-      <ion-item>
+    <!-- <ion-list>
+      <ion-item> -->
         <!-- <img  ng-src="{{item.product_image}}" > -->
         <!-- <a class="badge badge-balanced" style="position: absolute;right:0;" >{{item.status}}</a>
         <h4> {{item.product_name}} </h4>
         <p>Qty: {{item.item_qty}}  Price: RM {{item.product_price}}</p> -->
 
-        <div class="list card" ng-repeat="item in assetCollection" ng-click="viewOrder(item.id)">
+        <!-- <div class="list card" ng-repeat="item in assetCollection">
 
-          <div class="item item-avatar">
+          <div class="item item-avatar" ng-click="viewOrder(item.id)">
             <img src="/img/bottle-vector.jpg">
             <h2>{{item.date | date: 'medium'}}</h2>
             <h2>RM {{item.total_price}}</h2>
-            <h4>Press to view details</h4>
-          </div>
+          </div> -->
+          <ion-list ng-repeat="item in assetCollection">
+      <ion-item class="item-thumbnail-left" >
+        <img  ng-src="{{item.product_image}}" >
+        <a class="badge badge-balanced" style="position: absolute;right:0;" >{{item.status}}</a>
+        <h4> {{item.product_name}} </h4>
+        <p>Qty: {{item.item_qty}}  Price: RM {{item.product_price}}</p>
+      </ion-item>
+    </ion-list>
 
           <!-- <div class="item item-image">
             <img src="cover.jpg">
@@ -28,9 +35,9 @@
             Start listening
           </a> -->
 
-        </div>
+        <!-- </div> -->
 
-      </ion-item>
-    </ion-list>
+      <!-- </ion-item>
+    </ion-list> -->
   </ion-content>
 </ion-view>

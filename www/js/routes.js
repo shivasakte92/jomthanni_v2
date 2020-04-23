@@ -48,7 +48,10 @@ angular.module('app.routes', [])
   .state('lastOrders', {
     url: '/page7',
     templateUrl: 'templates/lastOrders.html',
-    controller: 'lastOrdersCtrl'
+    controller: 'lastOrdersCtrl',
+    params: {
+    'id': null
+      }
   })
 
   // .state('favourite', {
@@ -132,6 +135,15 @@ angular.module('app.routes', [])
     params: {
     'address': null, 
     'phone': null
+      }
+  })
+
+    .state('viewOrder', {
+    url: '/page20',
+    templateUrl: 'templates/viewOrder.html',
+    controller: 'viewOrderCtrl',
+    params: {
+    'id': null
       }
   })
 
