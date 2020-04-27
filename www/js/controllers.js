@@ -33,7 +33,6 @@ angular.module('app.controllers', ['ionic', 'ngCordova'])
   $scope.facebookSignIn = function() {
     sharedUtils.showLoading();
     facebookConnectPlugin.getLoginStatus(function(success){
-      console.log(success);
       if(success.status === 'connected'){
         // The user is logged in and has authenticated your app, and response.authResponse supplies
         // the user's ID, a valid access token, a signed request, and the time the access token
@@ -69,8 +68,6 @@ angular.module('app.controllers', ['ionic', 'ngCordova'])
         // FB permissions here: https://developers.facebook.com/docs/facebook-login/permissions/v2.4
         
           var fbLoginSuccess = function(response) {
-            
-            console.log(response);
 
             var credential = firebase.auth.FacebookAuthProvider.credential(response.authResponse.accessToken);
             firebase.auth().signInWithCredential(credential).then(function(result) {
@@ -104,7 +101,6 @@ angular.module('app.controllers', ['ionic', 'ngCordova'])
 
           // This is the fail callback from the login method
           var fbLoginError = function(error){
-            console.log('fbLoginError', error);
             sharedUtils.hideLoading();
             sharedUtils.showAlert("Login Failed!","Please make sure you have logged into your FB app");
           }
@@ -235,11 +231,45 @@ $scope.loginGmail = function(){
 
       // sharedUtils.showLoading();
 
+      var currentUser;
+
       //Check if user already logged in
       firebase.auth().onAuthStateChanged(function(user) {
         sharedUtils.showLoading();
         if (user) {
           $scope.user_info=user; //Saves data to user_info
+          currentUser=user;
+
+          function orderAgain(){
+        firebase.database().ref('orders').child(user.uid).on('value', function(_snapshot){
+
+          var result = [];
+
+          _snapshot.forEach(function (childSnapshot){
+            // var element = childSnapshot.val();
+            // element.id = childSnapshot.key;
+            // result.push(element);
+
+              childSnapshot.forEach(function (childSnapshot2){
+                var element = childSnapshot2.val();
+                  result.push(element);
+              })
+          });
+
+          $timeout(function(){
+            $scope.orderAgain = result;
+            $state.transitionTo($state.current, $stateParams, {
+              reload: true,
+              inherit: false,
+              notify: true
+            });
+            sharedUtils.hideLoading();
+          }, 1000);
+
+        });
+      }
+
+      orderAgain();
         }else {
 
         }
@@ -289,21 +319,46 @@ $scope.loginGmail = function(){
 
       }
 
+      function loadPopularItems(){
+        firebase.database().ref('popularItems').on('value', function(_snapshot){
+
+          var result = [];
+
+          _snapshot.forEach(function (childSnapshot){
+            var element = childSnapshot.val();
+            element.id = childSnapshot.key;
+            result.push(element);
+          });
+
+          $timeout(function(){
+            $scope.popularItems = result;
+            $state.transitionTo($state.current, $stateParams, {
+              reload: true,
+              inherit: false,
+              notify: true
+            });
+            sharedUtils.hideLoading();
+          }, 1000);
+
+        });
+      }
+
+      loadPopularItems();
+
+      
+
       function loadAnnouncements(){
         firebase.database().ref('announcements').on('value', function(_snapshot){
 
           result = [];
 
           _snapshot.forEach(function (childSnapshot){
-            // console.log(childSnapshot);
             var element = childSnapshot.val();
             element.id = childSnapshot.key;
             result.push(element);
-            // console.log(element);
           });
 
           $timeout(function(){
-            console.log(result);
             $scope.announcements = result;
             $state.transitionTo($state.current, $stateParams, {
               reload: true,
@@ -410,10 +465,8 @@ $scope.loginGmail = function(){
     firebase.auth().signOut().then(function() {
 
       facebookConnectPlugin.logout(function(){
-        console.log("cleared");
         },
         function(fail){
-          console.log(fail);
           sharedUtils.hideLoading();
         });
 
@@ -519,50 +572,55 @@ $scope.loginGmail = function(){
 
   $rootScope.extras = true;
   sharedUtils.showLoading();
-  //Check if user already logged in
-  firebase.auth().onAuthStateChanged(function (user) {
-    if (user) {
-      $scope.user_info = user;
-      // console.log(user);
+//Check if user already logged in
+firebase.auth().onAuthStateChanged(function (user) {
+  if (user) {
+    $scope.user_info = user;
 
-      function loadData(){
-        firebase.database().ref('orders').child(user.uid).on('value', function(_snapshot){
+    function loadData(){
+      firebase.database().ref('orders').child(user.uid).on('value', function(_snapshot){
 
-          result = [];
+        result = [];
 
-          _snapshot.forEach(function (childSnapshot){
-            // console.log(childSnapshot);
-            var element = childSnapshot.val();
-            element.id = childSnapshot.key;
-            result.push(element);
-            // console.log(element);
-          });
+        _snapshot.forEach(function (childSnapshot){
+          var element = childSnapshot.val();
+          var total_price = 10;
+          var time;
 
-          $timeout(function(){
-            console.log(result);
-            $scope.assetCollection = result.reverse();
-            $state.transitionTo($state.current, $stateParams, {
-              reload: true,
-              inherit: false,
-              notify: true
-            });
-            sharedUtils.hideLoading();
-          }, 1000);
+          firebase.database().ref('orders').child(user.uid).child(childSnapshot.key).on('value', function(_snapshot2){
+            _snapshot2.forEach(function (childSnapshot2){
+              var price = childSnapshot2.val().price;
+              total_price = parseInt(total_price)+parseInt(price);
+              time = childSnapshot2.val().time;
+            })
+
+          })
+          result.push({ id: childSnapshot.key, total_price: total_price, time: time});
 
         });
-      }
 
-      loadData();
+        $timeout(function(){
+          $scope.assetCollection = result.reverse();
+          $state.transitionTo($state.current, $stateParams, {
+            reload: true,
+            inherit: false,
+            notify: true
+          });
+          sharedUtils.hideLoading();
+        }, 1000);
 
+      });
     }
-  });
 
-  $scope.viewOrder = function(id){
+    loadData();
 
-    console.log("Here");
-    console.log(id);
-    $state.go('viewOrder', {"id":id}, {location: "replace"});
   }
+});
+
+$scope.viewOrder = function(id){
+
+  $state.go('viewOrder', {"id":id}, {location: "replace"});
+}
 
 })
 
@@ -586,15 +644,12 @@ firebase.auth().onAuthStateChanged(function (user) {
           result = [];
 
           _snapshot.forEach(function (childSnapshot){
-            // console.log(childSnapshot);
             var element = childSnapshot.val();
             element.id = childSnapshot.key;
             result.push(element);
-            // console.log(element);
           });
 
           $timeout(function(){
-            console.log(result);
             $scope.assetCollection = result;
             $state.transitionTo($state.current, $stateParams, {
               reload: true,
@@ -844,8 +899,10 @@ firebase.auth().onAuthStateChanged(function (user) {
             sharedUtils.showLoading();
 
             var newOrderRef = fireBaseData.refOrder().child($scope.user_info.uid).push();
+            var newOrderKey = newOrderRef.key();
             var timestamp = new Date().getTime();
-            var total_price = 10;
+            var total_price = 0;
+            // var newOrderRef2 = newOrderRef.push();
 
             for (var i = 0; i < sharedCartService.cart_items.length; i++) {
                   //Add cart item to order table
@@ -853,12 +910,12 @@ firebase.auth().onAuthStateChanged(function (user) {
                     newOrderRef.push({
 
                     //Product data is hardcoded for simplicity
-                    product_name: sharedCartService.cart_items[i].item_name,
-                    product_price: sharedCartService.cart_items[i].item_price,
-                    product_image: sharedCartService.cart_items[i].item_image,
-                    product_id: sharedCartService.cart_items[i].$id,
-                    total_price: sharedCartService.cart_items[i].item_price*sharedCartService.cart_items[i].item_qty,
+                    item_name: sharedCartService.cart_items[i].item_name,
+                    URL: sharedCartService.cart_items[i].item_image,
+                    id: sharedCartService.cart_items[i].$id,
+                    price: sharedCartService.cart_items[i].item_price,
                     time: timestamp,
+                    parentKey: newOrderKey,
 
                     //item data
                     item_qty: sharedCartService.cart_items[i].item_qty,
@@ -874,25 +931,6 @@ firebase.auth().onAuthStateChanged(function (user) {
                     total_price = total_price+(sharedCartService.cart_items[i].item_price*sharedCartService.cart_items[i].item_qty);
 
                 }
-
-                newOrderRef.update({
-                  date: timestamp,
-                  total_price: total_price
-                })
-
-                // $scope.sendEmail = function() {
-                    // Email.send({
-                    // Host: "smtp.gmail.com",
-                    // Username : "minimart.krishna@gmail.com",
-                    // Password : "gunanantha",
-                    // To : 'minimart.krishna@gmail.com',
-                    // From : "admin@minimart-krishna.com.my",
-                    // Subject : "New Order Received",
-                    // Body : "New order received, please check on the management app and accept the orders",
-                    // }).then(
-                    //   // message => alert("mail sent successfully")
-                    // );
-                  // }
 
                 //Remove users cart
                 fireBaseData.refCart().child($scope.user_info.uid).remove();

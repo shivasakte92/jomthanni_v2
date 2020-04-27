@@ -5,31 +5,15 @@
     <!-- <br> -->
     <ion-list>
       <ion-item>
-        <!-- <img  ng-src="{{item.product_image}}" > -->
-        <!-- <a class="badge badge-balanced" style="position: absolute;right:0;" >{{item.status}}</a>
-        <h4> {{item.product_name}} </h4>
-        <p>Qty: {{item.item_qty}}  Price: RM {{item.product_price}}</p> -->
-
         <div class="list card" ng-repeat="item in assetCollection" ng-click="viewOrder(item.id)">
-
           <div class="item item-avatar">
             <img src="/img/bottle-vector.jpg">
-            <h2>{{item.date | date: 'medium'}}</h2>
+            <h2>{{item.time | date: 'medium'}}</h2>
             <h2>RM {{item.total_price}}</h2>
+            <h3>Order No: {{item.id}}</h3>
             <h4>Press to view details</h4>
           </div>
-
-          <!-- <div class="item item-image">
-            <img src="cover.jpg">
-          </div> -->
-
-          <!-- <a class="item item-icon-left assertive" href="#">
-            <i class="icon ion-music-note"></i>
-            Start listening
-          </a> -->
-
         </div>
-
       </ion-item>
     </ion-list>
   </ion-content>

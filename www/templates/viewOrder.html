@@ -19,10 +19,10 @@
           </div> -->
           <ion-list ng-repeat="item in assetCollection">
       <ion-item class="item-thumbnail-left" >
-        <img  ng-src="{{item.product_image}}" >
+        <img  ng-src="{{item.URL}}" >
         <a class="badge badge-balanced" style="position: absolute;right:0;" >{{item.status}}</a>
-        <h4> {{item.product_name}} </h4>
-        <p>Qty: {{item.item_qty}}  Price: RM {{item.product_price}}</p>
+        <h4> {{item.item_name}} </h4>
+        <p>Qty: {{item.item_qty}}  Price: RM {{item.price}}</p>
       </ion-item>
     </ion-list>
 

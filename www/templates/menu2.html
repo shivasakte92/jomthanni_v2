@@ -25,6 +25,17 @@
     </ion-slide>
     </ion-slide-box>
 
+  <div ng-if="popularItems.length>=1">
+    <h4 style="padding-left: 10px;">Popular Item</h4>
+
+    <ion-scroll direction="x" class="wide-as-needed">
+      <div ng-repeat="item in popularItems" style="display: inline-block;white-space: nowrap; ">
+        <img ng-src="{{item.URL}}" style="margin: 10px; height:350px; width:auto; display: inline-block; border-radius: 8px;">
+      </div>
+    </ion-scroll>
+  </div>
+
+  <div ng-if="promotions.length>=1">
   <h4 style="padding-left: 10px;">Promotions</h4>
 
   <ion-scroll direction="x" class="wide-as-needed">
@@ -32,8 +43,25 @@
       <img ng-src="{{item.URL}}" style="margin: 10px; height:350px; width:auto; display: inline-block; border-radius: 8px;">
     </div>
   </ion-scroll>
+  </div>
+
+  <div ng-if="orderAgain.length>=1">
+    <h4 style="padding-left: 10px;">Order Again</h4>
+
+    <ion-scroll direction="x" class="wide-as-needed">
+      <div ng-repeat="item in orderAgain" style="display: inline-block;white-space: nowrap; ">
+        <img ng-src="{{item.URL}}" style="margin: 10px; height:250px; width:auto; display: inline-block; border-radius: 8px;">
+        <a class="item item-icon-right assertive" href="javascript:void(0)"  style="border-width: 0px; border-style: none;" >
+              <p style="font-size: 12px;text-align:left;">
+                <span style="font-weight: bold;color: black;">RM {{item.price}}</span>
+              </p>
+              <i style="font-size: 25px; margin-right:0px;right:0px;"  ng-click="addToCart(orderAgain[$index])" class="icon ion-ios-cart"></i>
+            </a>
+      </div>
+    </ion-scroll>
+  </div>
   
-<div class="row">
+<!-- <div class="row">
   <div class="column">
     <div style="width:image width px; font-size:80%; font-weight:bold; text-align:center;">
       <img src="img/latest4/spirits.png" ui-sref="spirits" style="width:100%">
@@ -66,6 +94,6 @@
       ACCESSORIES
     </div>
   </div>
-</div>
+</div> -->
 </ion-content>
 </ion-view>
