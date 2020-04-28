@@ -38,13 +38,13 @@ angular.module('app', ['ionic', 'ngCordova', 'app.controllers', 'app.routes', 'a
           function(data){
               if(data.wasTapped){
       //Notification was received on device tray and tapped by the user.
-                  console.log(JSON.stringify(data));
+                  // console.log(JSON.stringify(data));
                   sharedUtils.showAlert(JSON.stringify(data));
                   // alert("Tapped: " +  JSON.stringify(data) );
               }else{
       //Notification was received in foreground. Maybe the user needs to be notified.
                   // alert("Not tapped: " + JSON.stringify(data) );
-                  console.log(JSON.stringify(data));
+                  // console.log(JSON.stringify(data));
                   sharedUtils.showAlert(JSON.stringify(data.title));
               }
           },

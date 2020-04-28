@@ -1,0 +1,43 @@
+<ion-view style="" class=" " id="page21" title="View Past Orders">
+  <ion-content class="no-header background" padding="true">
+    <br>
+    <br>
+    <!-- <br> -->
+    <!-- <ion-list>
+      <ion-item> -->
+        <!-- <img  ng-src="{{item.product_image}}" > -->
+        <!-- <a class="badge badge-balanced" style="position: absolute;right:0;" >{{item.status}}</a>
+        <h4> {{item.product_name}} </h4>
+        <p>Qty: {{item.item_qty}}  Price: RM {{item.product_price}}</p> -->
+
+        <!-- <div class="list card" ng-repeat="item in assetCollection">
+
+          <div class="item item-avatar" ng-click="viewOrder(item.id)">
+            <img src="/img/bottle-vector.jpg">
+            <h2>{{item.date | date: 'medium'}}</h2>
+            <h2>RM {{item.total_price}}</h2>
+          </div> -->
+          <ion-list ng-repeat="item in pastOrderData">
+      <ion-item class="item-thumbnail-left" >
+        <img  ng-src="{{item.URL}}" >
+        <a class="badge badge-balanced" style="position: absolute;right:0;" >{{item.status}}</a>
+        <h4> {{item.item_name}} </h4>
+        <p>Qty: {{item.item_qty}}  Price: RM {{item.price}}</p>
+      </ion-item>
+    </ion-list>
+
+          <!-- <div class="item item-image">
+            <img src="cover.jpg">
+          </div> -->
+
+          <!-- <a class="item item-icon-left assertive" href="#">
+            <i class="icon ion-music-note"></i>
+            Start listening
+          </a> -->
+
+        <!-- </div> -->
+
+      <!-- </ion-item>
+    </ion-list> -->
+  </ion-content>
+</ion-view>

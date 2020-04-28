@@ -241,7 +241,7 @@ $scope.loginGmail = function(){
           currentUser=user;
 
           function orderAgain(){
-        firebase.database().ref('orders').child(user.uid).on('value', function(_snapshot){
+        firebase.database().ref('completedOrders').child(user.uid).on('value', function(_snapshot){
 
           var result = [];
 
@@ -291,7 +291,7 @@ $scope.loginGmail = function(){
 
         $scope.menu=$firebaseArray(fireBaseData.refMenu());
 
-        firebase.database().ref('promos').on('value', function(_snapshot){
+        firebase.database().ref('promotions').on('value', function(_snapshot){
 
           var result = [];
 
@@ -580,7 +580,7 @@ firebase.auth().onAuthStateChanged(function (user) {
     function loadData(){
       firebase.database().ref('orders').child(user.uid).on('value', function(_snapshot){
 
-        result = [];
+        var result = [];
 
         _snapshot.forEach(function (childSnapshot){
           var element = childSnapshot.val();
@@ -614,12 +614,52 @@ firebase.auth().onAuthStateChanged(function (user) {
 
     loadData();
 
+    function loadPastOrders(){
+      firebase.database().ref('completedOrders').child(user.uid).on('value', function(_snapshot){
+
+        var result = [];
+
+        _snapshot.forEach(function (childSnapshot){
+          var element = childSnapshot.val();
+          var total_price = 10;
+          var time;
+
+          firebase.database().ref('completedOrders').child(user.uid).child(childSnapshot.key).on('value', function(_snapshot2){
+            _snapshot2.forEach(function (childSnapshot2){
+              var price = childSnapshot2.val().price;
+              total_price = parseInt(total_price)+parseInt(price);
+              time = childSnapshot2.val().time;
+            })
+
+          })
+          result.push({ id: childSnapshot.key, total_price: total_price, time: time});
+
+        });
+
+        $timeout(function(){
+          $scope.pastOrders = result.reverse();
+          $state.transitionTo($state.current, $stateParams, {
+            reload: true,
+            inherit: false,
+            notify: true
+          });
+          sharedUtils.hideLoading();
+        }, 1000);
+
+      });
+    }
+
+    loadPastOrders();
+
   }
 });
 
 $scope.viewOrder = function(id){
-
   $state.go('viewOrder', {"id":id}, {location: "replace"});
+}
+
+$scope.viewPastOrder = function(id){
+  $state.go('viewPastOrder', {"id":id}, {location: "replace"});
 }
 
 })
@@ -663,6 +703,48 @@ firebase.auth().onAuthStateChanged(function (user) {
       }
 
       loadData();
+
+    }
+
+  });
+
+})
+
+.controller('viewPastOrderCtrl', function($scope,$rootScope,$http,sharedUtils,$state,$stateParams,$timeout) {
+
+  $rootScope.extras = true;
+  sharedUtils.showLoading();
+  var id = $stateParams.id;
+
+firebase.auth().onAuthStateChanged(function (user) {
+    if (user) {
+      $scope.user_info = user;
+
+  function loadpastOrderData(){
+        firebase.database().ref('completedOrders').child(user.uid).child(id).on('value', function(_snapshot){
+
+          result = [];
+
+          _snapshot.forEach(function (childSnapshot){
+            var element = childSnapshot.val();
+            element.id = childSnapshot.key;
+            result.push(element);
+          });
+
+          $timeout(function(){
+            $scope.pastOrderData = result;
+            $state.transitionTo($state.current, $stateParams, {
+              reload: true,
+              inherit: false,
+              notify: true
+            });
+            sharedUtils.hideLoading();
+          }, 1000);
+
+        });
+      }
+
+      loadpastOrderData();
 
     }
 
@@ -931,6 +1013,12 @@ firebase.auth().onAuthStateChanged(function (user) {
                     total_price = total_price+(sharedCartService.cart_items[i].item_price*sharedCartService.cart_items[i].item_qty);
 
                 }
+
+                var orderNotification = firebase.database().ref('/orderNotification');
+
+                orderNotification.push({
+                    orderID: newOrderKey
+                })
 
                 //Remove users cart
                 fireBaseData.refCart().child($scope.user_info.uid).remove();

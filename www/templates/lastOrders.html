@@ -5,6 +5,9 @@
     <!-- <br> -->
     <ion-list>
       <ion-item>
+
+        <div ng-if="assetCollection.length>=1">
+        <h2 style="padding-left: 10px;">Current Order</h2>
         <div class="list card" ng-repeat="item in assetCollection" ng-click="viewOrder(item.id)">
           <div class="item item-avatar">
             <img src="/img/bottle-vector.jpg">
@@ -14,6 +17,21 @@
             <h4>Press to view details</h4>
           </div>
         </div>
+        </div>
+
+        <div ng-if="pastOrders.length>=1">
+        <h2 style="padding-left: 10px;">Past Order</h2>
+        <div class="list card" ng-repeat="item in pastOrders" ng-click="viewPastOrder(item.id)">
+          <div class="item item-avatar">
+            <img src="/img/bottle-vector.jpg">
+            <h2>{{item.time | date: 'medium'}}</h2>
+            <h2>RM {{item.total_price}}</h2>
+            <h3>Order No: {{item.id}}</h3>
+            <h4>Press to view details</h4>
+          </div>
+        </div>
+        </div>
+
       </ion-item>
     </ion-list>
   </ion-content>

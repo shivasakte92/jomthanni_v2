@@ -147,6 +147,15 @@ angular.module('app.routes', [])
       }
   })
 
+    .state('viewPastOrder', {
+    url: '/page21',
+    templateUrl: 'templates/viewPastOrder.html',
+    controller: 'viewPastOrderCtrl',
+    params: {
+    'id': null
+      }
+  })
+
   // .state('testing', {
   //   url: '/page20',
   //   templateUrl: 'templates/testing.html',
