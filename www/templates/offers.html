@@ -1,9 +1,9 @@
 <ion-view style="" class=" " id="page5" title="">
     <ion-content class="background">
     <div class="bar bar-header">
-      <h1 class="title" id="current">Move the marker to your location:</h1>
+      <h1 class="title" id="current" ng-model="current" contentEditable="true">Move the marker to your location:</h1>
     </div>
         <div id="map" data-tap-disabled="true"></div>
-        <div class="button-on-map"><button ng-click="confirmLocation()" class="button button-assertive button-block" id="confirmlocation-button">CONFIRM LOCATION</button></div>
+        <div class="button-on-map"><button ng-click="confirmLocation(current)" class="button button-assertive button-block" id="confirmlocation-button">CONFIRM LOCATION</button></div>
     </ion-content>
 </ion-view>

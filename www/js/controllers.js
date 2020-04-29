@@ -1127,45 +1127,44 @@ firebase.auth().onAuthStateChanged(function (user) {
   })
 
 .controller('MapCtrl', function($scope, $state, $cordovaGeolocation, $rootScope, fireBaseData, $firebaseObject,
-                                     $ionicPopup, $window, $firebaseArray, sharedUtils) {
+  $ionicPopup, $window, $firebaseArray, sharedUtils) {
+
+  sharedUtils.showAlert("Info", "Move the marker to your location");
 
   firebase.auth().onAuthStateChanged(function(user) {
 
     if (user) {
 
-  $scope.addresses= $firebaseArray(fireBaseData.refUser().child(user.uid).child("address"));
+      $scope.addresses= $firebaseArray(fireBaseData.refUser().child(user.uid).child("address"));
 
-  }else{
+    }else{
 
-  }
+    }
 
-});
+  });
 
   if (window.cordova) {
-  cordova.plugins.diagnostic.isGpsLocationEnabled(
-                function(e) {
-                    if (e){
-                      // alert("location on")
+    cordova.plugins.diagnostic.isGpsLocationEnabled(
+      function(e) {
+        if (e){
+// alert("location on")
 
-                    }
-                    else {
-                      alert("Location is not turned ON");
-                      cordova.plugins.diagnostic.switchToLocationSettings();
-                    }
-                },
-                function(e) {
-                    alert('Error ' + e);
-                }
-            );
-        }
+}
+else {
+  alert("Location is not turned ON");
+  cordova.plugins.diagnostic.switchToLocationSettings();
+}
+},
+function(e) {
+  alert('Error ' + e);
+}
+);
+  }
 
   var options = {timeout: 10000, enableHighAccuracy: true};
-
   var latLng;
-
   var finalLat;
   var finalLng;
-
   var add;
   var zipcode;
 
@@ -1175,83 +1174,103 @@ firebase.auth().onAuthStateChanged(function (user) {
     var lat  = position.coords.latitude
     var long = position.coords.longitude
 
-    var mapOptions = {
-      center: latLng,
-      zoom: 15,
-      mapTypeId: google.maps.MapTypeId.ROADMAP
-    };
+var geocoder  = new google.maps.Geocoder();             // create a geocoder object
+// var location  = new google.maps.LatLng(evt.latLng.lat().toFixed(3), evt.latLng.lng().toFixed(3));    // turn coordinates into an object
+geocoder.geocode({'latLng': latLng}, function (results, status) {
+if(status == google.maps.GeocoderStatus.OK) {           // if geocode success
+add=results[0].formatted_address;         // if address found, pass to processing function
+for(var i=0; i < results.length; i++){
+  for(var j=0;j < results[i].address_components.length; j++){
+    for(var k=0; k < results[i].address_components[j].types.length; k++){
+      if(results[i].address_components[j].types[k] == "postal_code"){
+        zipcode = results[i].address_components[j].short_name;
+      }
+    }
+  }
+}
 
-    $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+document.getElementById('current').innerHTML = add;
 
-    google.maps.event.addListenerOnce($scope.map, 'idle', function(){
+}
+})
+
+var mapOptions = {
+  center: latLng,
+  zoom: 15,
+  mapTypeId: google.maps.MapTypeId.ROADMAP
+};
+
+$scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
+google.maps.event.addListenerOnce($scope.map, 'idle', function(){
 
   var marker = new google.maps.Marker({
-      map: $scope.map,
-      draggable: true,
-      animation: google.maps.Animation.DROP,
-      position: latLng
+    map: $scope.map,
+    draggable: true,
+    animation: google.maps.Animation.DROP,
+    position: latLng
   });
 
   var infoWindow = new google.maps.InfoWindow({
-      content: "Here I am!"
+    content: "Here I am!"
   });
 
   google.maps.event.addListener(marker, 'click', function () {
-      infoWindow.open($scope.map, marker);
+    infoWindow.open($scope.map, marker);
   });
 
   google.maps.event.addListener(marker, 'dragend', function (evt) {
 
-    var geocoder  = new google.maps.Geocoder();             // create a geocoder object
-    var location  = new google.maps.LatLng(evt.latLng.lat().toFixed(3), evt.latLng.lng().toFixed(3));    // turn coordinates into an object
-    geocoder.geocode({'latLng': location}, function (results, status) {
-    if(status == google.maps.GeocoderStatus.OK) {           // if geocode success
-    add=results[0].formatted_address;         // if address found, pass to processing function
-    for(var i=0; i < results.length; i++){
-            for(var j=0;j < results[i].address_components.length; j++){
-                for(var k=0; k < results[i].address_components[j].types.length; k++){
-                    if(results[i].address_components[j].types[k] == "postal_code"){
-                        zipcode = results[i].address_components[j].short_name;
-                    }
-                }
-            }
+var geocoder  = new google.maps.Geocoder();             // create a geocoder object
+var location  = new google.maps.LatLng(evt.latLng.lat().toFixed(3), evt.latLng.lng().toFixed(3));    // turn coordinates into an object
+geocoder.geocode({'latLng': location}, function (results, status) {
+if(status == google.maps.GeocoderStatus.OK) {           // if geocode success
+add=results[0].formatted_address;         // if address found, pass to processing function
+for(var i=0; i < results.length; i++){
+  for(var j=0;j < results[i].address_components.length; j++){
+    for(var k=0; k < results[i].address_components[j].types.length; k++){
+      if(results[i].address_components[j].types[k] == "postal_code"){
+        zipcode = results[i].address_components[j].short_name;
+      }
     }
-
-    document.getElementById('current').innerHTML = add;
-    document.write(add);
-
-    }
-    })
-
-
-
-    // document.getElementById('current').innerHTML = '<p>Marker dropped: Current Lat: ' + evt.latLng.lat().toFixed(3) + ' Current Lng: ' + evt.latLng.lng().toFixed(3) + '</p>';
-    finalLat = evt.latLng.lat().toFixed(3);
-});
-
-google.maps.event.addListener(marker, 'dragstart', function (evt) {
-    // document.getElementById('current').innerHTML = '<p>Currently dragging marker...</p>';
-    finalLng = evt.latLng.lng().toFixed(3);
-});
-
-});
-
-  }, function(error){
-
-  });
-
-  $scope.confirmLocation = function(edit_val) {
-
-    fireBaseData.refUser().child($scope.user_info.uid).child("address").push({    // set
-
-            address: add,
-            postcode: zipcode
-
-          });
-
-    $state.go('checkout', {}, {location: "replace"});
-
   }
+}
+
+document.getElementById('current').innerHTML = add;
+document.write(add);
+
+}
+})
+
+
+
+// document.getElementById('current').innerHTML = '<p>Marker dropped: Current Lat: ' + evt.latLng.lat().toFixed(3) + ' Current Lng: ' + evt.latLng.lng().toFixed(3) + '</p>';
+finalLat = evt.latLng.lat().toFixed(3);
+});
+
+  google.maps.event.addListener(marker, 'dragstart', function (evt) {
+// document.getElementById('current').innerHTML = '<p>Currently dragging marker...</p>';
+finalLng = evt.latLng.lng().toFixed(3);
+});
+
+});
+
+}, function(error){
+
+});
+
+  $scope.confirmLocation = function(current) {
+
+fireBaseData.refUser().child($scope.user_info.uid).child("address").push({    // set
+
+  address: add,
+  postcode: zipcode
+
+});
+
+$state.go('checkout', {}, {location: "replace"});
+
+}
 
 })
 
@@ -1376,7 +1395,7 @@ google.maps.event.addListener(marker, 'dragstart', function (evt) {
 
     // $scope.menu=$firebaseArray(fireBaseData.refMenuSpirits());
 
-    firebase.database().ref('menu/tobacco').on('value', function(_snapshot){
+    firebase.database().ref('menu/wine').on('value', function(_snapshot){
 
       var result = [];
 
