@@ -78,16 +78,6 @@ firebase.initializeApp(config);
       </ion-side-menu-content>
       <!-- #3.  $root.extras -->
       <ion-side-menu side="left" drag-content="false" id="side-menu21" ng-if="$root.extras" class="mymenu2">
-        <!-- <ion-header-bar class="light-bg header-bar-big">
-        <div class="panel">
-        <div class="user-heading round">
-          <img ng-src="{{&apos;img/fk/default_dp.JPG&apos;}}" class="avatar motion spin fade">
-          </div>
-          </div>
-          <div class="menu-bottom">
-            {{user_info.displayName}}
-          </div>
-        </ion-header-bar> -->
         <div class="panel">
         <div class="user-heading round">
           <img ng-src="{{avatar}}" class="avatar motion spin fade">
@@ -96,7 +86,7 @@ firebase.initializeApp(config);
         <ion-content class="has-expanded-header">
           <ion-list data-componentid="list1" class=" " id="menu-list1">
           <ion-item style="color:white" class="item-icon-center">
-              <i class="item-icon-center"></i><b><p style="color:white;font-family:profile_name;font-size: 20px;text-align:center;">{{user_info.displayName}}</p></b></ion-item>
+              <i class="item-icon-center"></i><b><p style="color:white;font-size: 20px;text-align:center;">{{user_info.displayName}}</p></b></ion-item>
             <ion-item data-componentid="list-item1" style="color:white" menu-close="" ui-sref="menu2" id="menu-list-item1" class="item-icon-left  ">
               <i class="icon ion-ios-home-outline"></i>Menu</ion-item>
                 <ion-item data-componentid="list-item8" style="color:white" menu-close="" ui-sref="myCart" id="menu-list-item8" class="item-icon-left  ">

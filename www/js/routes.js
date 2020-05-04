@@ -54,12 +54,6 @@ angular.module('app.routes', [])
       }
   })
 
-  // .state('favourite', {
-  //   url: '/page8',
-  //   templateUrl: 'templates/favourite.html',
-  //   controller: 'favouriteCtrl'
-  // })
-
   .state('settings', {
     url: '/page9',
     templateUrl: 'templates/settings.html',
@@ -156,12 +150,12 @@ angular.module('app.routes', [])
       }
   })
 
-  // .state('testing', {
-  //   url: '/page20',
-  //   templateUrl: 'templates/testing.html',
-  //   controller: 'testingCtrl'
-  // })
-
+    .state('phoneNumVerification', {
+    url: '/page22',
+    templateUrl: 'templates/phoneNumVerification.html',
+    controller: 'phoneNumVerificationCtrl'
+  })
+    
 $urlRouterProvider.otherwise('/page2')
 
 });

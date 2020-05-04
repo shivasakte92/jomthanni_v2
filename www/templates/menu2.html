@@ -4,6 +4,15 @@
   </ion-nav-title>
   <ion-content class="background" style="" padding="false" ng-init="loadMenu()">
   </br>
+
+  <!-- <div ng-if="currentOrders.length>=1">
+    <h4 style="padding-left: 10px;">Current Order</h4>
+    <div style="display: inline-block;white-space: nowrap; ">
+      <img src="img/source.gif" ui-sref="lastOrders" style="width:50%;height:50%;">
+      <img src="img/source.gif" ui-sref="lastOrders" style="width:50%;height:50%;">
+    </div>
+  </div> -->
+
   <h4 style="padding-left: 10px;">Category</h4>
 
   <ion-scroll direction="x" class="wide-as-needed">
@@ -27,6 +36,7 @@
 
   <div ng-if="popularItems.length>=1">
     <h4 style="padding-left: 10px;">Popular Item</h4>
+    <h6 style="padding-left: 10px;">Most popular drinks preferred by everyone</h6>
 
     <ion-scroll direction="x" class="wide-as-needed">
       <div ng-repeat="item in popularItems" style="display: inline-block;white-space: nowrap; ">
@@ -65,6 +75,7 @@
 
   <div ng-if="orderAgain.length>=1">
     <h4 style="padding-left: 10px;">Order Again</h4>
+    <h6 style="padding-left: 10px;">Why choose different? Order your favourite drink again!</h6>
 
     <ion-scroll direction="x" class="wide-as-needed">
       <div ng-repeat="item in orderAgain" style="display: inline-block;white-space: nowrap; ">
