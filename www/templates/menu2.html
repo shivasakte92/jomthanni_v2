@@ -41,10 +41,13 @@
     <ion-scroll direction="x" class="wide-as-needed">
       <div ng-repeat="item in popularItems" style="display: inline-block;white-space: nowrap; ">
         <img ng-src="{{item.URL}}" style="margin: 10px; height:350px; width:auto; display: inline-block; border-radius: 8px;">
+        <div class="content" style="text-align:center;font-weight:bold;">
+              {{item.item_name}}
+            </div>
         <a class="item item-icon-right assertive" href="javascript:void(0)"  style="border-width: 0px; border-style: none;" >
-        <p style="font-size: 12px;text-align:center;">
+        <!-- <p style="font-size: 12px;text-align:center;">
                 <span style="font-weight: bold;color: black;">{{item.item_name}}</span>
-              </p>
+              </p> -->
               <p style="font-size: 12px;text-align:left;">
                 <span style="font-weight: bold;color: black;">RM {{item.price}}</span>
                 </p>
@@ -60,10 +63,13 @@
   <ion-scroll direction="x" class="wide-as-needed">
     <div ng-repeat="item in promotions" style="display: inline-block;white-space: nowrap; ">
       <img ng-src="{{item.URL}}" style="margin: 10px; height:350px; width:auto; display: inline-block; border-radius: 8px;">
+      <div class="content" style="text-align:center;font-weight:bold;">
+              {{item.item_name}}
+            </div>
       <a class="item item-icon-right assertive" href="javascript:void(0)"  style="border-width: 0px; border-style: none;" >
-        <p style="font-size: 12px;text-align:center;">
+        <!-- <p style="font-size: 12px;text-align:center;">
                 <span style="font-weight: bold;color: black;">{{item.item_name}}</span>
-              </p>
+              </p> -->
               <p style="font-size: 12px;text-align:left;">
                 <span style="font-weight: bold;color: black;">RM {{item.price}}</span>
                 </p>
@@ -79,16 +85,21 @@
 
     <ion-scroll direction="x" class="wide-as-needed">
       <div ng-repeat="item in orderAgain" style="display: inline-block;white-space: nowrap; ">
+        <div ng-if="item.URL!=null">
         <img ng-src="{{item.URL}}" style="margin: 10px; height:250px; width:auto; display: inline-block; border-radius: 8px;">
+        <div class="content" style="text-align:center;font-weight:bold;">
+              {{item.item_name}}
+            </div>
         <a class="item item-icon-right assertive" href="javascript:void(0)"  style="border-width: 0px; border-style: none;" >
-        <p style="font-size: 12px;text-align:center;">
+        <!-- <p style="font-size: 12px;text-align:center;">
                 <span style="font-weight: bold;color: black;">{{item.item_name}}</span>
-              </p>
+              </p> -->
               <p style="font-size: 12px;text-align:left;">
                 <span style="font-weight: bold;color: black;">RM {{item.price}}</span>
                 </p>
               <i style="font-size: 25px; margin-right:0px;right:0px;"  ng-click="addToCart(orderAgain[$index])" class="icon ion-ios-cart"></i>
             </a>
+        </div>    
       </div>
     </ion-scroll>
   </div>

@@ -304,6 +304,8 @@ orderAgain();
 
 }else {
 
+  $scope.user_info = null;
+
 }
 });
 
