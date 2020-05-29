@@ -240,10 +240,19 @@ $state.go('menu2', {}, {location: "replace"});
 .controller('menu2Ctrl', function($scope,$rootScope,$ionicSideMenuDelegate,fireBaseData,$state,
   $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal, $timeout, $stateParams, $ionicSlideBoxDelegate, $ionicPopup) {
 
-// sharedUtils.showLoading();
+sharedUtils.showLoading();
 
-// var defaultAuth = firebase.auth();
-// console.log(defaultAuth);
+// On Loggin in to menu page, the sideMenu drag state is set to true
+// $ionicSideMenuDelegate.canDragContent(false);
+$rootScope.extras=true;
+
+// When user visits A-> B -> C -> A and clicks back, he will close the app instead of back linking
+$scope.$on('$ionicView.enter', function(ev) {
+  if(ev.targetScope !== $scope){
+    $ionicHistory.clearHistory();
+    $ionicHistory.clearCache();
+  }
+});
 
 var currentUser;
 
@@ -252,7 +261,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 
   var user_token = firebase.auth().currentUser.uid;
 
-  sharedUtils.showLoading();
+  // sharedUtils.showLoading();
   if (user) {
 $scope.user_info=user; //Saves data to user_info
 currentUser=user;
@@ -282,7 +291,7 @@ function orderAgain(){
         inherit: false,
         notify: true
       });
-      sharedUtils.hideLoading();
+      // sharedUtils.hideLoading();
     }, 1000);
 
   });
@@ -297,17 +306,7 @@ orderAgain();
 }
 });
 
-// On Loggin in to menu page, the sideMenu drag state is set to true
-// $ionicSideMenuDelegate.canDragContent(false);
-$rootScope.extras=true;
 
-// When user visits A-> B -> C -> A and clicks back, he will close the app instead of back linking
-$scope.$on('$ionicView.enter', function(ev) {
-  if(ev.targetScope !== $scope){
-    $ionicHistory.clearHistory();
-    $ionicHistory.clearCache();
-  }
-});
 
 $scope.loadMenu = function() {
 
@@ -320,8 +319,6 @@ $scope.loadMenu = function() {
     _snapshot.forEach(function (childSnapshot){
       var element = childSnapshot.val();
       element.id = childSnapshot.key;
-      // console.log(element);
-      // console.log(element.id);
       result.push(element);
     });
 
@@ -335,7 +332,7 @@ $scope.loadMenu = function() {
         inherit: false,
         notify: true
       });
-      sharedUtils.hideLoading();
+      // sharedUtils.hideLoading();
     }, 1000);
 
   });
@@ -360,7 +357,7 @@ function loadPopularItems(){
         inherit: false,
         notify: true
       });
-      sharedUtils.hideLoading();
+      // sharedUtils.hideLoading();
     }, 1000);
 
   });
@@ -371,16 +368,16 @@ loadPopularItems();
 function loadAnnouncements(){
   firebase.database().ref('announcements').on('value', function(_snapshot){
 
-    result = [];
+    announcements = [];
 
     _snapshot.forEach(function (childSnapshot){
       var element = childSnapshot.val();
       element.id = childSnapshot.key;
-      result.push(element);
+      announcements.push(element);
     });
 
     $timeout(function(){
-      $scope.announcements = result;
+      $scope.announcements = announcements;
       $state.transitionTo($state.current, $stateParams, {
         reload: true,
         inherit: false,
@@ -393,27 +390,6 @@ function loadAnnouncements(){
 }
 
 loadAnnouncements();
-
-$scope.showProductInfo=function (id) {
-
-};
-
-// $scope.addToCart=function(item){
-
-//   firebase.auth().onAuthStateChanged(function(user) {
-//     if (user) {
-//       sharedCartService.add(item);
-//     }else {
-
-//       sharedUtils.showAlert("Please note","You re required to sign up or login first!");
-//       $state.go('login', {}, {location: "replace"});
-
-//       $rootScope.extras = false;
-
-//     }
-//   });
-
-// };
 
     //Add to Cart
     $scope.addToCart = function(item) {
@@ -451,27 +427,6 @@ $scope.showProductInfo=function (id) {
         }
       });
     };
-
-// $scope.showImages = function(index) {
-//   $scope.activeSlide = index;
-//   $scope.showModal('templates/image-popover.html');
-// }
-
-// $scope.showModal = function(templateUrl) {
-//   $ionicModal.fromTemplateUrl(templateUrl, {
-//     scope: $scope,
-//     animation: 'slide-in-up'
-//   }).then(function(modal) {
-//     $scope.modal = modal;
-//     $scope.modal.show();
-//   });
-// }
-
-// // Close the modal
-// $scope.closeModal = function() {
-//   $scope.modal.hide();
-//   $scope.modal.remove()
-// };
 
 })
 
