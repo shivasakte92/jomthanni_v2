@@ -17,6 +17,9 @@ $scope.$on('$ionicView.enter', function(ev) {
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
 
+    var defaultAuth = firebase.auth();
+    // console.log(defaultAuth);
+
     $ionicHistory.nextViewOptions({
       historyRoot: true
     });
@@ -121,6 +124,7 @@ firebase.auth().signInWithEmailAndPassword(cred.email,cred.password).then(functi
 // 2. Set rootScope.extra;
 // 3. Turn off the loading
 // 4. Got to menu page
+// console.log(result);
 $ionicHistory.nextViewOptions({
   historyRoot: true
 });
@@ -130,6 +134,11 @@ $state.go('menu2', {}, {location: "replace"});
 
 },
 function(error) {
+  // console.log("Here");
+  var errorCode = error.code;
+  var errorMessage = error.message;
+  // console.log(errorCode);
+  // console.log(errorMessage);
   sharedUtils.hideLoading();
   sharedUtils.showAlert("Please note","Authentication Error");
 }
@@ -188,7 +197,7 @@ firebase.auth().createUserWithEmailAndPassword(cred.email, cred.password).then(f
     displayName: cred.name
   })
 //Add phone number to the user table
-fireBaseData.refUser().child(result.user.uid).set({
+firebase.database().ref('users').child(result.user.uid).set({
   user_name: cred.name,
   user_mail: cred.email
 });
@@ -229,14 +238,20 @@ $state.go('menu2', {}, {location: "replace"});
 //-------------------------------------------------------------------------------------------------------------------------------------
 
 .controller('menu2Ctrl', function($scope,$rootScope,$ionicSideMenuDelegate,fireBaseData,$state,
-  $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal, $timeout, $stateParams, $ionicSlideBoxDelegate) {
+  $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal, $timeout, $stateParams, $ionicSlideBoxDelegate, $ionicPopup) {
 
 // sharedUtils.showLoading();
+
+// var defaultAuth = firebase.auth();
+// console.log(defaultAuth);
 
 var currentUser;
 
 //Check if user already logged in
 firebase.auth().onAuthStateChanged(function(user) {
+
+  var user_token = firebase.auth().currentUser.uid;
+
   sharedUtils.showLoading();
   if (user) {
 $scope.user_info=user; //Saves data to user_info
@@ -275,33 +290,6 @@ function orderAgain(){
 
 orderAgain();
 
-// function loadCurrentOrders(){
-//   firebase.database().ref('orders').child(user.uid).on('value', function(_snapshot){
-
-//     var result = [];
-
-//     _snapshot.forEach(function (childSnapshot){
-//       var element = childSnapshot.val();
-//       element.id = childSnapshot.key;
-//       result.push(element);
-//     });
-
-//     $timeout(function(){
-//       $scope.currentOrders = result;
-//       console.log(result);
-//       $state.transitionTo($state.current, $stateParams, {
-//         reload: true,
-//         inherit: false,
-//         notify: true
-//       });
-//       sharedUtils.hideLoading();
-//     }, 1000);
-
-//   });
-// }
-
-// loadCurrentOrders();
-
 }else {
 
   $scope.user_info = null;
@@ -332,11 +320,14 @@ $scope.loadMenu = function() {
     _snapshot.forEach(function (childSnapshot){
       var element = childSnapshot.val();
       element.id = childSnapshot.key;
+      // console.log(element);
+      // console.log(element.id);
       result.push(element);
     });
 
     $timeout(function(){
       $scope.promotions = result;
+      // console.log($scope.promotions);
       $ionicSlideBoxDelegate.update();
       $ionicSlideBoxDelegate.loop(true)
       $state.transitionTo($state.current, $stateParams, {
@@ -348,8 +339,6 @@ $scope.loadMenu = function() {
     }, 1000);
 
   });
-
-// sharedUtils.hideLoading();
 
 }
 
@@ -408,43 +397,81 @@ loadAnnouncements();
 $scope.showProductInfo=function (id) {
 
 };
-$scope.addToCart=function(item){
 
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-      sharedCartService.add(item);
-    }else {
+// $scope.addToCart=function(item){
 
-      sharedUtils.showAlert("Please note","You re required to sign up or login first!");
-      $state.go('login', {}, {location: "replace"});
+//   firebase.auth().onAuthStateChanged(function(user) {
+//     if (user) {
+//       sharedCartService.add(item);
+//     }else {
 
-      $rootScope.extras = false;
+//       sharedUtils.showAlert("Please note","You re required to sign up or login first!");
+//       $state.go('login', {}, {location: "replace"});
 
-    }
-  });
+//       $rootScope.extras = false;
 
-};
+//     }
+//   });
 
-$scope.showImages = function(index) {
-  $scope.activeSlide = index;
-  $scope.showModal('templates/image-popover.html');
-}
+// };
 
-$scope.showModal = function(templateUrl) {
-  $ionicModal.fromTemplateUrl(templateUrl, {
-    scope: $scope,
-    animation: 'slide-in-up'
-  }).then(function(modal) {
-    $scope.modal = modal;
-    $scope.modal.show();
-  });
-}
+    //Add to Cart
+    $scope.addToCart = function(item) {
+      //check if item is already added or not
+      firebase.database().ref('cart').child(currentUser.uid).once("value", function(snapshot) {
 
-// Close the modal
-$scope.closeModal = function() {
-  $scope.modal.hide();
-  $scope.modal.remove()
-};
+        if( snapshot.hasChild(item.id) == true ){
+
+          //if item is already in the cart
+          var currentQty = snapshot.child(item.id).val().item_qty;
+
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).update({   // update
+            item_qty : currentQty+1,
+            item_total_price: (item.price*(currentQty+1))
+          });
+
+        }else{
+
+          var alertPopup = $ionicPopup.alert({
+             title: 'Item Added!',
+             template: 'You can view them in your cart'
+           });
+           alertPopup.then(function(res) {
+           });
+
+          //if item is new in the cart
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).set({    // set
+            item_name: item.item_name,
+            item_image: item.URL,
+            item_price: item.price,
+            item_qty: 1,
+            item_total_price: (item.price*1),
+            user: firebase.auth().currentUser.email
+          });
+        }
+      });
+    };
+
+// $scope.showImages = function(index) {
+//   $scope.activeSlide = index;
+//   $scope.showModal('templates/image-popover.html');
+// }
+
+// $scope.showModal = function(templateUrl) {
+//   $ionicModal.fromTemplateUrl(templateUrl, {
+//     scope: $scope,
+//     animation: 'slide-in-up'
+//   }).then(function(modal) {
+//     $scope.modal = modal;
+//     $scope.modal.show();
+//   });
+// }
+
+// // Close the modal
+// $scope.closeModal = function() {
+//   $scope.modal.hide();
+//   $scope.modal.remove()
+// };
 
 })
 
@@ -470,9 +497,31 @@ $scope.user_info=user; //Saves data to user_info
 //Else it will show unwanted console error till we get the user object
 $scope.get_total= function() {
   var total_qty=0;
-  for (var i = 0; i < sharedCartService.cart_items.length; i++) {
-    total_qty += sharedCartService.cart_items[i].item_qty;
-  }
+  // console.log(sharedCartService.cart_items);
+
+  // result = [];
+  firebase.database().ref('cart').child(user.uid).on('value', function(_snapshot){
+
+          _snapshot.forEach(function (childSnapshot){
+              var element = childSnapshot.val();
+              // element.id = childSnapshot.key;
+              total_qty += element.item_qty;
+              // result.push(element);
+            });
+
+        });
+
+  // if(sharedCartService.cart_items !== undefined){
+    
+  // }
+
+  // console.log(result);
+
+//   if(sharedCartService.cart_items !== undefined){
+//   for (var i = 0; i < sharedCartService.cart_items.length; i++) {
+//     total_qty += sharedCartService.cart_items[i].item_qty;
+//   }
+// }
   return total_qty;
 };
 
@@ -533,43 +582,45 @@ $timeout(function () {
 
 //-------------------------------------------------------------------------------------------------------------------------------------
 
-.controller('myCartCtrl', function($scope,$rootScope,$state,sharedCartService,sharedUtils) {
+.controller('myCartCtrl', function($scope,$rootScope,$state,sharedCartService,sharedUtils,$timeout,$stateParams) {
 
   $rootScope.extras=true;
 
 //Check if user already logged in
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
+      // $scope.cart=sharedCartService.cart_items;
+      firebase.database().ref('cart').child(user.uid).on('value', function(_snapshot){
 
-$scope.cart=sharedCartService.cart_items;  // Loads users cart
+          $scope.total_qty=0;
+          $scope.total_amount=0;
+          result = [];
 
-$scope.get_qty = function() {
-  $scope.total_qty=0;
-  $scope.total_amount=0;
+          _snapshot.forEach(function (childSnapshot){
+            var element = childSnapshot.val();
+            element.id = childSnapshot.key;
+            $scope.total_qty += element.item_qty;
+            $scope.total_amount += (element.item_qty * element.item_price);
+            result.push(element);
+          });
 
-  for (var i = 0; i < sharedCartService.cart_items.length; i++) {
-    $scope.total_qty += sharedCartService.cart_items[i].item_qty;
-    $scope.total_amount += (sharedCartService.cart_items[i].item_qty * sharedCartService.cart_items[i].item_price);
-  }
-  return $scope.total_qty;
-};
-}else{
+            $scope.cart = result;
 
-}
+        });
+
+  }else{
+
+    }
 
 });
 
-$scope.loadMenu = function() {
-  sharedUtils.showLoading();
-  $scope.menu=$firebaseArray(fireBaseData.refMenuBeer());
-  sharedUtils.hideLoading();
-}
-
 $scope.removeFromCart=function(c_id){
+  // console.log(c_id);
   sharedCartService.drop(c_id);
 };
 
 $scope.inc=function(c_id){
+  // console.log(c_id);
   sharedCartService.increment(c_id);
 };
 
@@ -811,10 +862,10 @@ firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
 
 //Accessing an array of objects using firebaseObject, does not give you the $id , so use firebase array to get $id
-$scope.addresses= $firebaseArray(fireBaseData.refUser().child(user.uid).child("address"));
+// $scope.addresses= $firebaseArray(fireBaseData.refUser().child(user.uid).child("address"));
 
 // firebaseObject is good for accessing single objects for eg:- telephone. Don't use it for array of objects
-$scope.user_extras= $firebaseObject(fireBaseData.refUser().child(user.uid));
+// $scope.user_extras= $firebaseObject(fireBaseData.refUser().child(user.uid));
 
 $scope.user_info=user; //Saves data to user_info
 //NOTE: $scope.user_info is not writable ie you can't use it inside ng-model of <input>
@@ -924,17 +975,17 @@ $scope.deleteAddress = function(del_id) {
 
 $scope.save= function (extras,editable) {
 //1. Edit Telephone doesnt show popup 2. Using extras and editable  // Bugs
-if(extras.telephone!="" && extras.telephone!=null ){
-//Update  Telephone
-fireBaseData.refUser().child($scope.user_info.uid).update({    // set
-  telephone: extras.telephone
-});
-}
+// if(extras.telephone!="" && extras.telephone!=null ){
+// //Update  Telephone
+// fireBaseData.refUser().child($scope.user_info.uid).update({    // set
+//   telephone: extras.telephone
+// });
+// }
 
 //Edit Password
 if(editable.password!="" && editable.password!=null  ){
 //Update Password in UserAuthentication Table
-firebase.auth().currentUser.updatePassword(editable.password).then(function(ok) {}, function(error) {});
+firebase.auth().currentUser.updatePassword(editable.password).then(function(ok) {}, function(error) {console.log(error)});
 sharedUtils.showAlert("Account","Password Updated");
 }
 
@@ -984,7 +1035,7 @@ $window.location.reload(true);
 //-------------------------------------------------------------------------------------------------------------------------------------
 
 .controller('checkoutCtrl', function($scope,$rootScope,sharedUtils,$state,$stateParams,$firebaseArray,
-  $ionicHistory,fireBaseData, $ionicPopup,sharedCartService,$http) {
+  $ionicHistory,fireBaseData, $ionicPopup,sharedCartService,$http,$timeout) {
 
   $rootScope.extras=true;
 
@@ -993,16 +1044,76 @@ $window.location.reload(true);
     shop_open = snapshot.node_.value_;
   });
 
-  var postCode;
+  var defaultPostCode;
 
 //Check if user already logged in
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
-    $scope.addresses= $firebaseArray( fireBaseData.refUser().child(user.uid).child("address") );
-    $scope.phone= $firebaseArray( fireBaseData.refUser().child(user.uid).child("phone") );
-    $scope.user_postcode= $firebaseArray( fireBaseData.refUser().child(user.uid).child("postcode") );
+    // $scope.addresses= $firebaseArray( fireBaseData.refUser().child(user.uid).child("address") );
+    // $scope.phone= $firebaseArray( fireBaseData.refUser().child(user.uid).child("phone") );
+    // $scope.user_postcode= $firebaseArray( fireBaseData.refUser().child(user.uid).child("postcode") );
     $scope.user_info=user;
-    postCode = $firebaseArray( fireBaseData.refPostcodes() );
+    // postCode = $firebaseArray( fireBaseData.refPostcodes() );
+
+    firebase.database().ref('users').child(user.uid).child("address").on('value', function(_snapshot){
+
+          addresses = [];
+
+          _snapshot.forEach(function (childSnapshot){
+            var element = childSnapshot.val();
+            // console.log(element);
+            element.id = childSnapshot.key;
+            addresses.push(element);
+            // console.log(addresses)
+            
+          });
+
+          $scope.addresses = addresses;
+
+        });
+
+    firebase.database().ref('users').child(user.uid).child("phone").on('value', function(_snapshot){
+
+          phone_numbers = [];
+
+          _snapshot.forEach(function (childSnapshot){
+            var element = childSnapshot.val();
+            element.id = childSnapshot.key;
+            phone_numbers.push(element);
+          });
+
+          $scope.phone = phone_numbers;
+
+        });
+
+    firebase.database().ref('users').child(user.uid).child("postcode").on('value', function(_snapshot){
+
+          result = [];
+
+          _snapshot.forEach(function (childSnapshot){
+            var element = childSnapshot.val();
+            element.id = childSnapshot.key;
+            result.push(element);
+          });
+
+          $scope.user_postcode = result;
+
+        });
+
+    firebase.database().ref('postcodes').on('value', function(_snapshot){
+
+          postCode = [];
+
+          _snapshot.forEach(function (childSnapshot){
+            var element = childSnapshot.val();
+            element.id = childSnapshot.key;
+            postCode.push(element);
+            // console.log(postCode);
+          });
+
+          defaultPostCode = postCode;
+
+        });
   }
 });
 
@@ -1027,52 +1138,63 @@ else {
 
     confirmPopup.then(function(res) {
       if(res) {
-        for(var i=0; i < postCode.length; i++){
-          if(postCode[i].postcode == address.postcode){
+        for(var i=0; i < defaultPostCode.length; i++){
+          if(defaultPostCode[i].postcode == address.postcode){
             sharedUtils.showLoading();
 
-            var newOrderRef = fireBaseData.refOrder().child($scope.user_info.uid).push();
-            var newOrderKey = newOrderRef.key();
+            var newOrderRef = firebase.database().ref('orders').child($scope.user_info.uid).push();
+            // console.log(newOrderRef.key);
+            var newOrderKey = newOrderRef.key;
             var timestamp = new Date().getTime();
             var total_price = 0;
-// var newOrderRef2 = newOrderRef.push();
+         // var newOrderRef2 = newOrderRef.push();
 
-for (var i = 0; i < sharedCartService.cart_items.length; i++) {
-//Add cart item to order table
-// fireBaseData.refOrder().child($scope.user_info.uid).push({
-  newOrderRef.push({
+    // firebase.database().ref('cart').child(user.uid).on('value', function(_snapshot){
 
-//Product data is hardcoded for simplicity
-item_name: sharedCartService.cart_items[i].item_name,
-URL: sharedCartService.cart_items[i].item_image,
-id: sharedCartService.cart_items[i].$id,
-price: sharedCartService.cart_items[i].item_price,
-time: timestamp,
-parentKey: newOrderKey,
+    //       _snapshot.forEach(function (childSnapshot){
+    //           var element = childSnapshot.val();
+    //           // element.id = childSnapshot.key;
+    //           total_qty += element.item_qty;
+    //           // result.push(element);
+    //         });
 
-//item data
-item_qty: sharedCartService.cart_items[i].item_qty,
+    //     });
 
-//Order data
-user_id: $scope.user_info.uid,
-user_address: address.address,
-user_phone: phone,
-user_name:firebase.auth().currentUser.email,
-status: "Queued"
+    for (var i = 0; i < Object.keys(sharedCartService.cart_items).length; i++) {
+    //Add cart item to order table
+    // fireBaseData.refOrder().child($scope.user_info.uid).push({
+      // console.log(sharedCartService.cart_items[i]);
+        newOrderRef.push({
+
+      //Product data is hardcoded for simplicity
+      item_name: sharedCartService.cart_items[i].item_name,
+      URL: sharedCartService.cart_items[i].item_image,
+      id: sharedCartService.cart_items[i].id,
+      price: sharedCartService.cart_items[i].item_price,
+      time: timestamp,
+      parentKey: newOrderKey,
+
+      //item data
+      item_qty: sharedCartService.cart_items[i].item_qty,
+
+      //Order data
+      user_id: $scope.user_info.uid,
+      user_address: address.address,
+      user_phone: phone,
+      user_name:firebase.auth().currentUser.email,
+      status: "Queued"
+      });
+
+      total_price = total_price+(sharedCartService.cart_items[i].item_price*sharedCartService.cart_items[i].item_qty);
+
+    }
+
+firebase.database().ref('orderNotification').push({    // set
+  orderID: newOrderKey
 });
 
-  total_price = total_price+(sharedCartService.cart_items[i].item_price*sharedCartService.cart_items[i].item_qty);
-
-}
-
-var orderNotification = firebase.database().ref('/orderNotification');
-
-orderNotification.push({
-  orderID: newOrderKey
-})
-
 //Remove users cart
-fireBaseData.refCart().child($scope.user_info.uid).remove();
+firebase.database().ref('cart').child($scope.user_info.uid).remove();
 
 sharedUtils.showAlert("Info", "Order successfull, your orders will be delivered within 2 hours!");
 
@@ -1155,7 +1277,7 @@ addressPopup.then(function(res) {
 
   if(edit_val!=null) {
 //Update  address
-fireBaseData.refUser().child($scope.user_info.uid).child("phone").child(edit_val.$id).update({    // set
+firebase.database().ref('users').child($scope.user_info.uid).child("phone").child(edit_val.$id).update({    // set
 // nickname: res.nickname,
 // address: res.address,
 // pin: res.pin,
@@ -1163,7 +1285,7 @@ phone: res.phone
 });
 }else{
 //Add new address
-fireBaseData.refUser().child($scope.user_info.uid).child("phone").push({    // set
+firebase.database().ref('users').child($scope.user_info.uid).child("phone").push({    // set
 // nickname: res.nickname,
 // address: res.address,
 // pin: res.pin,
@@ -1180,7 +1302,7 @@ phone: res.phone
 //-------------------------------------------------------------------------------------------------------------------------------------
 
 .controller('MapCtrl', function($scope, $state, $cordovaGeolocation, $rootScope, fireBaseData, $firebaseObject,
-  $ionicPopup, $window, $firebaseArray, sharedUtils) {
+  $ionicPopup, $window, $firebaseArray, sharedUtils,$timeout,$stateParams) {
 
   sharedUtils.showAlert("Info", "Move the marker to your location");
 
@@ -1188,7 +1310,30 @@ phone: res.phone
 
     if (user) {
 
-      $scope.addresses= $firebaseArray(fireBaseData.refUser().child(user.uid).child("address"));
+      firebase.database().ref('users').child(user.uid).child("address").on('value', function(_snapshot){
+
+          result = [];
+
+          _snapshot.forEach(function (childSnapshot){
+            var element = childSnapshot.val();
+            element.id = childSnapshot.key;
+            result.push(element);
+          });
+
+          $timeout(function(){
+
+            $scope.addresses = result;
+
+            $state.transitionTo($state.current, $stateParams, {
+              reload: true,
+              inherit: false,
+              notify: true
+            });
+            // sharedUtils.hideLoading();
+          }, 1000);
+        });
+
+      // $scope.addresses= $firebaseArray(fireBaseData.refUser().child(user.uid).child("address"));
 
     }else{
 
@@ -1312,7 +1457,7 @@ finalLng = evt.latLng.lng().toFixed(3);
 
   $scope.confirmLocation = function(current) {
 
-fireBaseData.refUser().child($scope.user_info.uid).child("address").push({    // set
+firebase.database().ref('users').child($scope.user_info.uid).child("address").push({    // set
 
   address: add,
   postcode: zipcode
@@ -1328,12 +1473,16 @@ $state.go('checkout', {}, {location: "replace"});
 //-------------------------------------------------------------------------------------------------------------------------------------
 
 .controller('spiritsCtrl', function($scope,$rootScope,$ionicSideMenuDelegate,fireBaseData,$state,
-  $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal) {
+  $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal, $ionicPopup) {
+
   sharedUtils.showLoading();
 //Check if user already logged in
+var currentUser;
+
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
 $scope.user_info=user; //Saves data to user_info
+currentUser = user;
 }else {
 
 }
@@ -1379,22 +1528,60 @@ $scope.loadMenu = function() {
 $scope.showProductInfo=function (id) {
 
 };
-$scope.addToCart=function(item){
+// $scope.addToCart=function(item){
 
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-      sharedCartService.add(item);
-    }else {
+//   firebase.auth().onAuthStateChanged(function(user) {
+//     if (user) {
+//       sharedCartService.add(item);
+//     }else {
 
-      sharedUtils.showAlert("Please note","You are required to sign up or login first!");
-      $state.go('login', {}, {location: "replace"});
+//       sharedUtils.showAlert("Please note","You are required to sign up or login first!");
+//       $state.go('login', {}, {location: "replace"});
 
-      $rootScope.extras = false;
+//       $rootScope.extras = false;
 
 
-    }
-  });
+//     }
+//   });
 
+// };
+
+$scope.addToCart = function(item) {
+
+      //check if item is already added or not
+      firebase.database().ref('cart').child(currentUser.uid).once("value", function(snapshot) {
+
+        if( snapshot.hasChild(item.id) == true ){
+
+          //if item is already in the cart
+          var currentQty = snapshot.child(item.id).val().item_qty;
+
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).update({   // update
+            item_qty : currentQty+1,
+            item_total_price: (item.price*(currentQty+1))
+          });
+
+        }else{
+
+          var alertPopup = $ionicPopup.alert({
+             title: 'Item Added!',
+             template: 'You can view them in your cart'
+           });
+           alertPopup.then(function(res) {
+           });
+
+          //if item is new in the cart
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).set({    // set
+            item_name: item.item_name,
+            item_image: item.URL,
+            item_price: item.price,
+            item_qty: 1,
+            item_total_price: (item.price*1),
+            user: currentUser.email
+          });
+        }
+      });
+      
 };
 
 $scope.showImages = function(index) {
@@ -1423,12 +1610,16 @@ $scope.closeModal = function() {
 //-------------------------------------------------------------------------------------------------------------------------------------
 
 .controller('wineCtrl', function($scope,$rootScope,$ionicSideMenuDelegate,fireBaseData,$state,
-  $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal) {
+  $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal, $ionicPopup) {
+
   sharedUtils.showLoading();
+
+  var currentUser;
 //Check if user already logged in
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
 $scope.user_info=user; //Saves data to user_info
+currentUser = user;
 }else {
 
 }
@@ -1474,22 +1665,60 @@ firebase.database().ref('menu/wine').on('value', function(_snapshot){
 $scope.showProductInfo=function (id) {
 
 };
-$scope.addToCart=function(item){
+// $scope.addToCart=function(item){
 
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-      sharedCartService.add(item);
-    }else {
+//   firebase.auth().onAuthStateChanged(function(user) {
+//     if (user) {
+//       sharedCartService.add(item);
+//     }else {
 
-      sharedUtils.showAlert("Please note","You are required to sign up or login first!");
-      $state.go('login', {}, {location: "replace"});
+//       sharedUtils.showAlert("Please note","You are required to sign up or login first!");
+//       $state.go('login', {}, {location: "replace"});
 
-      $rootScope.extras = false;
+//       $rootScope.extras = false;
 
 
-    }
-  });
+//     }
+//   });
 
+// };
+
+$scope.addToCart = function(item) {
+
+      //check if item is already added or not
+      firebase.database().ref('cart').child(currentUser.uid).once("value", function(snapshot) {
+
+        if( snapshot.hasChild(item.id) == true ){
+
+          //if item is already in the cart
+          var currentQty = snapshot.child(item.id).val().item_qty;
+
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).update({   // update
+            item_qty : currentQty+1,
+            item_total_price: (item.price*(currentQty+1))
+          });
+
+        }else{
+
+          var alertPopup = $ionicPopup.alert({
+             title: 'Item Added!',
+             template: 'You can view them in your cart'
+           });
+           alertPopup.then(function(res) {
+           });
+
+          //if item is new in the cart
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).set({    // set
+            item_name: item.item_name,
+            item_image: item.URL,
+            item_price: item.price,
+            item_qty: 1,
+            item_total_price: (item.price*1),
+            user: currentUser.email
+          });
+        }
+      });
+      
 };
 
 $scope.showImages = function(index) {
@@ -1518,12 +1747,16 @@ $scope.closeModal = function() {
 //-------------------------------------------------------------------------------------------------------------------------------------
 
 .controller('beersCtrl', function($scope,$rootScope,$ionicSideMenuDelegate,fireBaseData,$state,
-  $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal) {
+  $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal,$ionicPopup) {
+
   sharedUtils.showLoading();
 //Check if user already logged in
+var currentUser;
+
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
 $scope.user_info=user; //Saves data to user_info
+currentUser = user;
 }else {
 
 }
@@ -1570,22 +1803,60 @@ firebase.database().ref('menu/beer').on('value', function(_snapshot){
 $scope.showProductInfo=function (id) {
 
 };
-$scope.addToCart=function(item){
+// $scope.addToCart=function(item){
 
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-      sharedCartService.add(item);
-    }else {
+//   firebase.auth().onAuthStateChanged(function(user) {
+//     if (user) {
+//       sharedCartService.add(item);
+//     }else {
 
-      sharedUtils.showAlert("Please note","You are required to sign up or login first!");
-      $state.go('login', {}, {location: "replace"});
+//       sharedUtils.showAlert("Please note","You are required to sign up or login first!");
+//       $state.go('login', {}, {location: "replace"});
 
-      $rootScope.extras = false;
+//       $rootScope.extras = false;
 
 
-    }
-  });
+//     }
+//   });
 
+// };
+
+$scope.addToCart = function(item) {
+
+      //check if item is already added or not
+      firebase.database().ref('cart').child(currentUser.uid).once("value", function(snapshot) {
+
+        if( snapshot.hasChild(item.id) == true ){
+
+          //if item is already in the cart
+          var currentQty = snapshot.child(item.id).val().item_qty;
+
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).update({   // update
+            item_qty : currentQty+1,
+            item_total_price: (item.price*(currentQty+1))
+          });
+
+        }else{
+
+          var alertPopup = $ionicPopup.alert({
+             title: 'Item Added!',
+             template: 'You can view them in your cart'
+           });
+           alertPopup.then(function(res) {
+           });
+
+          //if item is new in the cart
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).set({    // set
+            item_name: item.item_name,
+            item_image: item.URL,
+            item_price: item.price,
+            item_qty: 1,
+            item_total_price: (item.price*1),
+            user: currentUser.email
+          });
+        }
+      });
+      
 };
 
 $scope.allImages = [{
@@ -1622,12 +1893,16 @@ $scope.closeModal = function() {
 //-------------------------------------------------------------------------------------------------------------------------------------
 
 .controller('tobaccoCtrl', function($scope,$rootScope,$ionicSideMenuDelegate,fireBaseData,$state,
-  $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal) {
+  $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal, $ionicPopup) {
+
   sharedUtils.showLoading();
+
+  var currentUser;
 //Check if user already logged in
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
 $scope.user_info=user; //Saves data to user_info
+currentUser = user;
 }else {
 
 }
@@ -1673,22 +1948,60 @@ firebase.database().ref('menu/tobacco').on('value', function(_snapshot){
 $scope.showProductInfo=function (id) {
 
 };
-$scope.addToCart=function(item){
+// $scope.addToCart=function(item){
 
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-      sharedCartService.add(item);
-    }else {
+//   firebase.auth().onAuthStateChanged(function(user) {
+//     if (user) {
+//       sharedCartService.add(item);
+//     }else {
 
-      sharedUtils.showAlert("Please note","You are required to sign up or login first!");
-      $state.go('login', {}, {location: "replace"});
+//       sharedUtils.showAlert("Please note","You are required to sign up or login first!");
+//       $state.go('login', {}, {location: "replace"});
 
-      $rootScope.extras = false;
+//       $rootScope.extras = false;
 
 
-    }
-  });
+//     }
+//   });
 
+// };
+
+$scope.addToCart = function(item) {
+
+      //check if item is already added or not
+      firebase.database().ref('cart').child(currentUser.uid).once("value", function(snapshot) {
+
+        if( snapshot.hasChild(item.id) == true ){
+
+          //if item is already in the cart
+          var currentQty = snapshot.child(item.id).val().item_qty;
+
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).update({   // update
+            item_qty : currentQty+1,
+            item_total_price: (item.price*(currentQty+1))
+          });
+
+        }else{
+
+          var alertPopup = $ionicPopup.alert({
+             title: 'Item Added!',
+             template: 'You can view them in your cart'
+           });
+           alertPopup.then(function(res) {
+           });
+
+          //if item is new in the cart
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).set({    // set
+            item_name: item.item_name,
+            item_image: item.URL,
+            item_price: item.price,
+            item_qty: 1,
+            item_total_price: (item.price*1),
+            user: currentUser.email
+          });
+        }
+      });
+      
 };
 
 $scope.showImages = function(index) {
@@ -1717,12 +2030,16 @@ $scope.closeModal = function() {
 //-------------------------------------------------------------------------------------------------------------------------------------
 
 .controller('accessoriesCtrl', function($scope,$rootScope,$ionicSideMenuDelegate,fireBaseData,$state,
-  $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal) {
+  $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal, $ionicPopup) {
+
   sharedUtils.showLoading();
+
+  var currentUser;
 //Check if user already logged in
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
 $scope.user_info=user; //Saves data to user_info
+currentUser = user;
 }else {
 
 }
@@ -1768,22 +2085,60 @@ firebase.database().ref('menu/accessories').on('value', function(_snapshot){
 $scope.showProductInfo=function (id) {
 
 };
-$scope.addToCart=function(item){
+// $scope.addToCart=function(item){
 
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-      sharedCartService.add(item);
-    }else {
+//   firebase.auth().onAuthStateChanged(function(user) {
+//     if (user) {
+//       sharedCartService.add(item);
+//     }else {
 
-      sharedUtils.showAlert("Please note","You are required to sign up or login first!");
-      $state.go('login', {}, {location: "replace"});
+//       sharedUtils.showAlert("Please note","You are required to sign up or login first!");
+//       $state.go('login', {}, {location: "replace"});
 
-      $rootScope.extras = false;
+//       $rootScope.extras = false;
 
 
-    }
-  });
+//     }
+//   });
 
+// };
+
+$scope.addToCart = function(item) {
+
+      //check if item is already added or not
+      firebase.database().ref('cart').child(currentUser.uid).once("value", function(snapshot) {
+
+        if( snapshot.hasChild(item.id) == true ){
+
+          //if item is already in the cart
+          var currentQty = snapshot.child(item.id).val().item_qty;
+
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).update({   // update
+            item_qty : currentQty+1,
+            item_total_price: (item.price*(currentQty+1))
+          });
+
+        }else{
+
+          var alertPopup = $ionicPopup.alert({
+             title: 'Item Added!',
+             template: 'You can view them in your cart'
+           });
+           alertPopup.then(function(res) {
+           });
+
+          //if item is new in the cart
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).set({    // set
+            item_name: item.item_name,
+            item_image: item.URL,
+            item_price: item.price,
+            item_qty: 1,
+            item_total_price: (item.price*1),
+            user: currentUser.email
+          });
+        }
+      });
+      
 };
 
 $scope.showImages = function(index) {
@@ -1812,12 +2167,16 @@ $scope.closeModal = function() {
 //-------------------------------------------------------------------------------------------------------------------------------------
 
 .controller('othersCtrl', function($scope,$rootScope,$ionicSideMenuDelegate,fireBaseData,$state,
-  $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal) {
+  $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal, $ionicPopup) {
+
   sharedUtils.showLoading();
+
+  var currentUser;
 //Check if user already logged in
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
 $scope.user_info=user; //Saves data to user_info
+currentUser = user;
 }else {
 
 }
@@ -1861,22 +2220,60 @@ firebase.database().ref('menu/others').on('value', function(_snapshot){
 $scope.showProductInfo=function (id) {
 
 };
-$scope.addToCart=function(item){
+// $scope.addToCart=function(item){
 
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-      sharedCartService.add(item);
-    }else {
+//   firebase.auth().onAuthStateChanged(function(user) {
+//     if (user) {
+//       sharedCartService.add(item);
+//     }else {
 
-      sharedUtils.showAlert("Please note","You are required to sign up or login first!");
-      $state.go('login', {}, {location: "replace"});
+//       sharedUtils.showAlert("Please note","You are required to sign up or login first!");
+//       $state.go('login', {}, {location: "replace"});
 
-      $rootScope.extras = false;
+//       $rootScope.extras = false;
 
 
-    }
-  });
+//     }
+//   });
 
+// };
+
+$scope.addToCart = function(item) {
+
+      //check if item is already added or not
+      firebase.database().ref('cart').child(currentUser.uid).once("value", function(snapshot) {
+
+        if( snapshot.hasChild(item.id) == true ){
+
+          //if item is already in the cart
+          var currentQty = snapshot.child(item.id).val().item_qty;
+
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).update({   // update
+            item_qty : currentQty+1,
+            item_total_price: (item.price*(currentQty+1))
+          });
+
+        }else{
+
+          var alertPopup = $ionicPopup.alert({
+             title: 'Item Added!',
+             template: 'You can view them in your cart'
+           });
+           alertPopup.then(function(res) {
+           });
+
+          //if item is new in the cart
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).set({    // set
+            item_name: item.item_name,
+            item_image: item.URL,
+            item_price: item.price,
+            item_qty: 1,
+            item_total_price: (item.price*1),
+            user: currentUser.email
+          });
+        }
+      });
+      
 };
 
 $scope.showImages = function(index) {
@@ -1991,7 +2388,7 @@ status: "Queued"
 }
 
 //Remove users cart
-fireBaseData.refCart().child($scope.user_info.uid).remove();
+firebase.database().ref('cart').child($scope.user_info.uid).remove();
 
 sharedUtils.showAlert("Info", "Order Successfull");
 

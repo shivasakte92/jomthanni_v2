@@ -1,4 +1,4 @@
-<ion-view style="" class=" " id="page6" title="Checkout">
+<ion-view style="" class=" " id="page6" title="My Cart">
   <ion-content class="no-header background" padding="true">
     <br>
     <br>
@@ -23,10 +23,10 @@
             </p>
           </div>
           <div class="button-bar" style="box-shadow: none;">
-            <button ng-click="removeFromCart(item.$id)" class="button button-assertive button-block button-small icon ion-android-delete" ></button>
-            <button class="button button-stable button-clear button-block button-small icon ion-plus" ng-click="inc(item.$id)"></button>
+            <button ng-click="removeFromCart(cart[$index].id)" class="button button-assertive button-block button-small icon ion-android-delete" ></button>
+            <button class="button button-stable button-clear button-block button-small icon ion-plus" ng-click="inc(cart[$index].id)"></button>
             <button class="button button-stable button-clear button-block button-small">{{item.item_qty}}</button>
-            <button class="button button-stable button-clear button-block  icon ion-minus" ng-click="dec(item.$id)" ></button>
+            <button class="button button-stable button-clear button-block  icon ion-minus" ng-click="dec(cart[$index].id)" ></button>
           </div>
         </div>
       </div>

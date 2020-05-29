@@ -4,7 +4,7 @@ angular.module('app.services', [])
 	var ref = new Firebase("https://production-app-9ed98.firebaseio.com/"),
     refCart = new Firebase("https://production-app-9ed98.firebaseio.com/cart"),
     refPostcodes = new Firebase("https://production-app-9ed98.firebaseio.com/postcodes"),
-    refUser = new Firebase("https://production-app-9ed98.firebaseio.com/users"),
+    refUser = new Firebase("https://production-app-9ed98.firebaseio.com/users/"),
     refCategory = new Firebase("https://production-app-9ed98.firebaseio.com/category"),
     refOrder = new Firebase("https://production-app-9ed98.firebaseio.com/orders"),
     refFeatured = new Firebase("https://production-app-9ed98.firebaseio.com/featured"),
@@ -89,7 +89,7 @@ angular.module('app.services', [])
 
 }])
 
-  .factory('sharedCartService', ['$ionicPopup','fireBaseData','$firebaseArray',function($ionicPopup, fireBaseData, $firebaseArray){
+  .factory('sharedCartService', ['$ionicPopup','fireBaseData','$firebaseArray', '$timeout', '$state', function($ionicPopup, fireBaseData, $firebaseArray, $timeout, $state, $stateParams, sharedUtils){
 
     var uid ;// uid is temporary user_id
     var cart={}; // the main Object
@@ -98,21 +98,38 @@ angular.module('app.services', [])
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
         uid=user.uid;
-        cart.cart_items = $firebaseArray(fireBaseData.refCart().child(uid));
+        // console.log(uid);
+        // cart.cart_items = $firebaseArray(fireBaseData.refCart().child(uid));
+        // console.log(cart.cart_items);
+
+        firebase.database().ref('cart').child(uid).on('value', function(_snapshot){
+
+          result = [];
+
+          _snapshot.forEach(function (childSnapshot){
+            var element = childSnapshot.val();
+            element.id = childSnapshot.key;
+            result.push(element);
+          });
+
+          cart.cart_items = result;
+
+        });
+
       }
     });
 
     //Add to Cart
     cart.add = function(item) {
       //check if item is already added or not
-      fireBaseData.refCart().child(uid).once("value", function(snapshot) {
+      firebase.database().ref('cart').child(uid).once("value", function(snapshot) {
 
         if( snapshot.hasChild(item.id) == true ){
 
           //if item is already in the cart
           var currentQty = snapshot.child(item.id).val().item_qty;
 
-          fireBaseData.refCart().child(uid).child(item.id).update({   // update
+          firebase.database().ref('cart/').child(uid).child(item.id).update({   // update
             item_qty : currentQty+1,
             item_total_price: (item.price*(currentQty+1))
           });
@@ -127,7 +144,7 @@ angular.module('app.services', [])
            });
 
           //if item is new in the cart
-          fireBaseData.refCart().child(uid).child(item.id).set({    // set
+          firebase.database().ref('cart/').child(uid).child(item.id).set({    // set
             item_name: item.item_name,
             item_image: item.URL,
             item_price: item.price,
@@ -140,19 +157,27 @@ angular.module('app.services', [])
     };
 
     cart.drop=function(item_id){
-      fireBaseData.refCart().child(uid).child(item_id).remove();
+      var drop_item = firebase.database().ref('cart/'+uid+'/'+item_id+'/');
+      // console.log(item_id);
+      drop_item.remove()
+          .then(function() {
+            // console.log("Remove succeeded.")
+          })
+          .catch(function(error) {
+            // console.log("Remove failed: " + error.message)
+          });
     };
 
     cart.increment=function(item_id){
 
       //check if item is exist in the cart or not
-      fireBaseData.refCart().child(uid).once("value", function(snapshot) {
+      firebase.database().ref('cart').child(uid).once("value", function(snapshot) {
         if( snapshot.hasChild(item_id) == true ){
 
           var currentQty = snapshot.child(item_id).val().item_qty;
           var item_price = snapshot.child(item_id).val().item_price;
           //check if currentQty+1 is less than available stock
-          fireBaseData.refCart().child(uid).child(item_id).update({
+          firebase.database().ref('cart').child(uid).child(item_id).update({
             item_qty : currentQty+1,
             item_total_price: (item_price*(currentQty+1))
           });
@@ -167,7 +192,7 @@ angular.module('app.services', [])
     cart.decrement=function(item_id){
 
       //check if item is exist in the cart or not
-      fireBaseData.refCart().child(uid).once("value", function(snapshot) {
+      firebase.database().ref('cart').child(uid).once("value", function(snapshot) {
         if( snapshot.hasChild(item_id) == true ){
 
           var currentQty = snapshot.child(item_id).val().item_qty;
@@ -176,7 +201,7 @@ angular.module('app.services', [])
           if( currentQty-1 <= 0){
             cart.drop(item_id);
           }else{
-            fireBaseData.refCart().child(uid).child(item_id).update({
+            firebase.database().ref('cart').child(uid).child(item_id).update({
               item_qty : currentQty-1,
               item_total_price: (item_price*(currentQty-1))
             });
