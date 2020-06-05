@@ -706,7 +706,7 @@ firebase.auth().onAuthStateChanged(function (user) {
           firebase.database().ref('orders').child(user.uid).child(childSnapshot.key).on('value', function(_snapshot2){
             _snapshot2.forEach(function (childSnapshot2){
               var price = childSnapshot2.val().price;
-              total_price = parseInt(total_price)+parseInt(price);
+              total_price = parseInt(total_price)+(parseInt(price)*parseInt(childSnapshot2.val().item_qty));
               time = childSnapshot2.val().time;
             })
 
@@ -743,7 +743,7 @@ firebase.auth().onAuthStateChanged(function (user) {
           firebase.database().ref('completedOrders').child(user.uid).child(childSnapshot.key).on('value', function(_snapshot2){
             _snapshot2.forEach(function (childSnapshot2){
               var price = childSnapshot2.val().price;
-              total_price = parseInt(total_price)+parseInt(price);
+              total_price = parseInt(total_price)+(parseInt(price)*parseInt(childSnapshot2.val().item_qty));
               time = childSnapshot2.val().time;
             })
 
