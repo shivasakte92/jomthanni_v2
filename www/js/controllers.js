@@ -240,6 +240,9 @@ $state.go('menu2', {}, {location: "replace"});
 .controller('menu2Ctrl', function($scope,$rootScope,$ionicSideMenuDelegate,fireBaseData,$state,
   $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal, $timeout, $stateParams, $ionicSlideBoxDelegate, $ionicPopup) {
 
+  var total_qty=0;
+  var restriction_qty=0;
+
 sharedUtils.showLoading();
 
 // On Loggin in to menu page, the sideMenu drag state is set to true
@@ -265,6 +268,25 @@ firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
 $scope.user_info=user; //Saves data to user_info
 currentUser=user;
+
+firebase.database().ref('cart').child(user.uid).on('value', function(_snapshot){
+
+  total_qty=0;
+  restriction_qty=0;
+
+          _snapshot.forEach(function (childSnapshot){
+              var element = childSnapshot.val();
+              // element.id = childSnapshot.key;
+              total_qty += element.item_qty;
+              // result.push(element);
+              if(element.restriction == 'yes'){
+
+                restriction_qty += element.item_qty;
+
+              }
+            });
+
+        });
 
 function orderAgain(){
   firebase.database().ref('completedOrders').child(user.uid).on('value', function(_snapshot){
@@ -305,8 +327,6 @@ orderAgain();
 
 }
 });
-
-
 
 $scope.loadMenu = function() {
 
@@ -396,6 +416,44 @@ loadAnnouncements();
       //check if item is already added or not
       firebase.database().ref('cart').child(currentUser.uid).once("value", function(snapshot) {
 
+    if(item.category=='Tobacco'||item.category=='Others'||item.category=='Accessories'){
+
+      if( snapshot.hasChild(item.id) == true ){
+
+          //if item is already in the cart
+          var currentQty = snapshot.child(item.id).val().item_qty;
+
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).update({   // update
+            item_qty : currentQty+1,
+            item_total_price: (item.price*(currentQty+1))
+          });
+
+        }else{
+
+          var alertPopup = $ionicPopup.alert({
+             title: 'Item Added!',
+             template: 'You can view them in your cart'
+           });
+           alertPopup.then(function(res) {
+           });
+
+          //if item is new in the cart
+          firebase.database().ref('cart/').child(currentUser.uid).child(item.id).set({    // set
+            item_name: item.item_name,
+            item_image: item.URL,
+            item_price: item.price,
+            item_qty: 1,
+            item_total_price: (item.price*1),
+            category: item.category,
+            user: firebase.auth().currentUser.email
+          });
+          
+        }
+
+    }else{
+
+      if(restriction_qty<=3){
+
         if( snapshot.hasChild(item.id) == true ){
 
           //if item is already in the cart
@@ -422,9 +480,24 @@ loadAnnouncements();
             item_price: item.price,
             item_qty: 1,
             item_total_price: (item.price*1),
+            category: item.category,
+            restriction: 'yes',
             user: firebase.auth().currentUser.email
           });
+
         }
+
+      }else{
+          var alertPopup = $ionicPopup.alert({
+             title: 'Maximum item limit!',
+             template: 'You have reached the maximum item limit for Spirit, Wine and Beer'
+           });
+           alertPopup.then(function(res) {
+           });
+      }
+
+        }
+
       });
     };
 
@@ -1127,6 +1200,7 @@ else {
       id: sharedCartService.cart_items[i].id,
       price: sharedCartService.cart_items[i].item_price,
       time: timestamp,
+      category: sharedCartService.cart_items[i].category,
       parentKey: newOrderKey,
 
       //item data
@@ -1430,6 +1504,13 @@ $state.go('checkout', {}, {location: "replace"});
 .controller('spiritsCtrl', function($scope,$rootScope,$ionicSideMenuDelegate,fireBaseData,$state,
   $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal, $ionicPopup) {
 
+  var total_qty=0;
+  var restriction_qty=0;
+  // console.log(sharedCartService.cart_items);
+
+  // result = [];
+  
+
   sharedUtils.showLoading();
 //Check if user already logged in
 var currentUser;
@@ -1438,6 +1519,25 @@ firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
 $scope.user_info=user; //Saves data to user_info
 currentUser = user;
+
+firebase.database().ref('cart').child(user.uid).on('value', function(_snapshot){
+
+  total_qty=0;
+  restriction_qty=0;
+
+          _snapshot.forEach(function (childSnapshot){
+              var element = childSnapshot.val();
+              // element.id = childSnapshot.key;
+              total_qty += element.item_qty;
+              // result.push(element);
+              if(element.restriction == 'yes'){
+
+                restriction_qty += element.item_qty;
+
+              }
+            });
+
+        });
 }else {
 
 }
@@ -1506,8 +1606,11 @@ $scope.addToCart = function(item) {
       //check if item is already added or not
       firebase.database().ref('cart').child(currentUser.uid).once("value", function(snapshot) {
 
-        if( snapshot.hasChild(item.id) == true ){
+      if(restriction_qty<=3){
 
+        if( snapshot.hasChild(item.id) == true ){
+          console.log(snapshot.child(item.id).val());
+          console.log(total_qty);
           //if item is already in the cart
           var currentQty = snapshot.child(item.id).val().item_qty;
 
@@ -1532,9 +1635,20 @@ $scope.addToCart = function(item) {
             item_price: item.price,
             item_qty: 1,
             item_total_price: (item.price*1),
+            category: item.category,
+            restriction: 'yes',
             user: currentUser.email
           });
         }
+      }else{
+          var alertPopup = $ionicPopup.alert({
+             title: 'Maximum item limit!',
+             template: 'You have reached the maximum item limit for Spirit, Wine and Beer'
+           });
+           alertPopup.then(function(res) {
+           });
+      }
+
       });
       
 };
@@ -1567,6 +1681,9 @@ $scope.closeModal = function() {
 .controller('wineCtrl', function($scope,$rootScope,$ionicSideMenuDelegate,fireBaseData,$state,
   $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal, $ionicPopup) {
 
+  var total_qty=0;
+  var restriction_qty=0;
+
   sharedUtils.showLoading();
 
   var currentUser;
@@ -1575,6 +1692,25 @@ firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
 $scope.user_info=user; //Saves data to user_info
 currentUser = user;
+
+firebase.database().ref('cart').child(user.uid).on('value', function(_snapshot){
+
+  total_qty=0;
+  restriction_qty=0;
+
+          _snapshot.forEach(function (childSnapshot){
+              var element = childSnapshot.val();
+              // element.id = childSnapshot.key;
+              total_qty += element.item_qty;
+              // result.push(element);
+              if(element.restriction == 'yes'){
+
+                restriction_qty += element.item_qty;
+
+              }
+            });
+
+        });
 }else {
 
 }
@@ -1643,6 +1779,8 @@ $scope.addToCart = function(item) {
       //check if item is already added or not
       firebase.database().ref('cart').child(currentUser.uid).once("value", function(snapshot) {
 
+        if(restriction_qty<=3){
+
         if( snapshot.hasChild(item.id) == true ){
 
           //if item is already in the cart
@@ -1669,9 +1807,21 @@ $scope.addToCart = function(item) {
             item_price: item.price,
             item_qty: 1,
             item_total_price: (item.price*1),
+            category: item.category,
+            restriction: 'yes',
             user: currentUser.email
           });
         }
+
+        }else{
+          var alertPopup = $ionicPopup.alert({
+             title: 'Maximum item limit!',
+             template: 'You have reached the maximum item limit for Spirit, Wine and Beer'
+           });
+           alertPopup.then(function(res) {
+           });
+      }
+
       });
       
 };
@@ -1704,6 +1854,9 @@ $scope.closeModal = function() {
 .controller('beersCtrl', function($scope,$rootScope,$ionicSideMenuDelegate,fireBaseData,$state,
   $ionicHistory,$firebaseArray,sharedCartService,sharedUtils, $ionicModal,$ionicPopup) {
 
+  var total_qty=0;
+  var restriction_qty=0;
+
   sharedUtils.showLoading();
 //Check if user already logged in
 var currentUser;
@@ -1712,6 +1865,25 @@ firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
 $scope.user_info=user; //Saves data to user_info
 currentUser = user;
+
+firebase.database().ref('cart').child(user.uid).on('value', function(_snapshot){
+
+  total_qty=0;
+  restriction_qty=0;
+
+          _snapshot.forEach(function (childSnapshot){
+              var element = childSnapshot.val();
+              // element.id = childSnapshot.key;
+              total_qty += element.item_qty;
+              // result.push(element);
+              if(element.restriction == 'yes'){
+
+                restriction_qty += element.item_qty;
+
+              }
+            });
+
+        });
 }else {
 
 }
@@ -1781,6 +1953,8 @@ $scope.addToCart = function(item) {
       //check if item is already added or not
       firebase.database().ref('cart').child(currentUser.uid).once("value", function(snapshot) {
 
+        if(restriction_qty<=3){
+
         if( snapshot.hasChild(item.id) == true ){
 
           //if item is already in the cart
@@ -1807,9 +1981,22 @@ $scope.addToCart = function(item) {
             item_price: item.price,
             item_qty: 1,
             item_total_price: (item.price*1),
+            category: item.category,
+            restriction: 'yes',
             user: currentUser.email
           });
         }
+
+        }else{
+          var alertPopup = $ionicPopup.alert({
+             title: 'Maximum item limit!',
+             template: 'You have reached the maximum item limit for Spirit, Wine and Beer'
+           });
+           alertPopup.then(function(res) {
+           });
+      }
+
+
       });
       
 };
@@ -1952,6 +2139,7 @@ $scope.addToCart = function(item) {
             item_price: item.price,
             item_qty: 1,
             item_total_price: (item.price*1),
+            category: item.category,
             user: currentUser.email
           });
         }
@@ -2089,6 +2277,7 @@ $scope.addToCart = function(item) {
             item_price: item.price,
             item_qty: 1,
             item_total_price: (item.price*1),
+            category: item.category,
             user: currentUser.email
           });
         }
@@ -2224,6 +2413,7 @@ $scope.addToCart = function(item) {
             item_price: item.price,
             item_qty: 1,
             item_total_price: (item.price*1),
+            category: item.category,
             user: currentUser.email
           });
         }
