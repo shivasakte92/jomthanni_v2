@@ -452,7 +452,7 @@ loadAnnouncements();
 
     }else{
 
-      if(restriction_qty<=3){
+      if(restriction_qty<=2){
 
         if( snapshot.hasChild(item.id) == true ){
 
@@ -610,9 +610,10 @@ $timeout(function () {
 
 //-------------------------------------------------------------------------------------------------------------------------------------
 
-.controller('myCartCtrl', function($scope,$rootScope,$state,sharedCartService,sharedUtils,$timeout,$stateParams) {
+.controller('myCartCtrl', function($scope,$rootScope,$state,sharedCartService,sharedUtils,$timeout,$stateParams,$ionicPopup) {
 
   $rootScope.extras=true;
+  var restriction_qty=0;
 
 //Check if user already logged in
 firebase.auth().onAuthStateChanged(function(user) {
@@ -622,6 +623,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 
           $scope.total_qty=0;
           $scope.total_amount=0;
+          restriction_qty=0;
           result = [];
 
           _snapshot.forEach(function (childSnapshot){
@@ -630,6 +632,11 @@ firebase.auth().onAuthStateChanged(function(user) {
             $scope.total_qty += element.item_qty;
             $scope.total_amount += (element.item_qty * element.item_price);
             result.push(element);
+            if(element.restriction == 'yes'){
+
+                restriction_qty += element.item_qty;
+
+              }
           });
 
             $scope.cart = result;
@@ -647,9 +654,25 @@ $scope.removeFromCart=function(c_id){
   sharedCartService.drop(c_id);
 };
 
-$scope.inc=function(c_id){
+$scope.inc=function(item){
+    if(item.category=='Tobacco'||item.category=='Others'||item.category=='Accessories'){
+      sharedCartService.increment(item.id);
+  }else{
+
+    if(restriction_qty<=2){
+  sharedCartService.increment(item.id);
+  }else{
+          var alertPopup = $ionicPopup.alert({
+             title: 'Maximum item limit!',
+             template: 'You have reached the maximum item limit for Spirit, Wine and Beer'
+           });
+           alertPopup.then(function(res) {
+           });
+      }
+
+  }
   // console.log(c_id);
-  sharedCartService.increment(c_id);
+  
 };
 
 $scope.dec=function(c_id){
@@ -1606,7 +1629,7 @@ $scope.addToCart = function(item) {
       //check if item is already added or not
       firebase.database().ref('cart').child(currentUser.uid).once("value", function(snapshot) {
 
-      if(restriction_qty<=3){
+      if(restriction_qty<=2){
 
         if( snapshot.hasChild(item.id) == true ){
           console.log(snapshot.child(item.id).val());
@@ -1779,7 +1802,7 @@ $scope.addToCart = function(item) {
       //check if item is already added or not
       firebase.database().ref('cart').child(currentUser.uid).once("value", function(snapshot) {
 
-        if(restriction_qty<=3){
+        if(restriction_qty<=2){
 
         if( snapshot.hasChild(item.id) == true ){
 
@@ -1953,7 +1976,7 @@ $scope.addToCart = function(item) {
       //check if item is already added or not
       firebase.database().ref('cart').child(currentUser.uid).once("value", function(snapshot) {
 
-        if(restriction_qty<=3){
+        if(restriction_qty<=2){
 
         if( snapshot.hasChild(item.id) == true ){
 

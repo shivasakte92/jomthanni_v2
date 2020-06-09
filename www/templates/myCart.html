@@ -24,7 +24,7 @@
           </div>
           <div class="button-bar" style="box-shadow: none;">
             <button ng-click="removeFromCart(cart[$index].id)" class="button button-assertive button-block button-small icon ion-android-delete" ></button>
-            <button class="button button-stable button-clear button-block button-small icon ion-plus" ng-click="inc(cart[$index].id)"></button>
+            <button class="button button-stable button-clear button-block button-small icon ion-plus" ng-click="inc(cart[$index])"></button>
             <button class="button button-stable button-clear button-block button-small">{{item.item_qty}}</button>
             <button class="button button-stable button-clear button-block  icon ion-minus" ng-click="dec(cart[$index].id)" ></button>
           </div>
