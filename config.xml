@@ -2,7 +2,7 @@
 <widget id="com.jomthanni.krishnaminimart" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Jom Thanni</name>
     <description>
-        A one stop drinking app brought to you by Krishna Minimart.
+        A one stop drinking app with many choices delivering to your doorstep.
     </description>
     <author email="shiva-sakte@vastinnovation.com.my" href="http://vastinnovation.com.my/">
       VAST Innovation
@@ -16,8 +16,8 @@
     <preference name="UIWebViewBounce" value="false" />
     <preference name="DisallowOverscroll" value="true" />
     <preference name="StatusBarOverlaysWebView" value="true" />
-    <preference name="SplashScreenDelay" value="1000" />
-    <preference name="FadeSplashScreenDuration" value="2000" />
+    <preference name="SplashScreenDelay" value="3000" />
+    <preference name="FadeSplashScreenDuration" value="5000" />
     <preference name="android-minSdkVersion" value="16" />
     <preference name="BackupWebStorage" value="none" />
     <feature name="StatusBar">

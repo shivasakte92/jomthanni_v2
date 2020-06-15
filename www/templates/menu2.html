@@ -1,4 +1,4 @@
-<ion-view style="" class="" id="page4">
+<ion-view cache-view="false" style="" class="" id="page4">
   <ion-nav-title class="MyFont">
     <span>Jom Thanni</span>
   </ion-nav-title>
@@ -28,7 +28,7 @@
 
   <h4 style="padding-left: 10px;">Announcements</h4>
 
-    <ion-slide-box slide-intervel='30000' auto-play="true">
+    <ion-slide-box slide-intervel='30000' auto-play="true" does-continue="true">
     <ion-slide ng-repeat="item in announcements">
     <img ng-src="{{item.URL}}" style="width:100%;height:100%;"/>
     </ion-slide>

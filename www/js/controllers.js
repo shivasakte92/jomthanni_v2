@@ -306,15 +306,17 @@ function orderAgain(){
     var uniq = {}
     var arrFiltered = result.filter(obj => !uniq[obj.item_name] && (uniq[obj.item_name] = true));
 
-    $timeout(function(){
-      $scope.orderAgain = arrFiltered.reverse();
-      $state.transitionTo($state.current, $stateParams, {
-        reload: true,
-        inherit: false,
-        notify: true
-      });
-      // sharedUtils.hideLoading();
-    }, 1000);
+    $scope.orderAgain = arrFiltered.reverse();
+
+    // $timeout(function(){
+    //   $scope.orderAgain = arrFiltered.reverse();
+    //   $state.transitionTo($state.current, $stateParams, {
+    //     reload: true,
+    //     inherit: false,
+    //     notify: true
+    //   });
+    //   // sharedUtils.hideLoading();
+    // }, 1000);
 
   });
 }
@@ -342,18 +344,22 @@ $scope.loadMenu = function() {
       result.push(element);
     });
 
-    $timeout(function(){
       $scope.promotions = result;
-      // console.log($scope.promotions);
       $ionicSlideBoxDelegate.update();
       $ionicSlideBoxDelegate.loop(true)
-      $state.transitionTo($state.current, $stateParams, {
-        reload: true,
-        inherit: false,
-        notify: true
-      });
-      // sharedUtils.hideLoading();
-    }, 1000);
+
+    // $timeout(function(){
+    //   $scope.promotions = result;
+    //   // console.log($scope.promotions);
+    //   $ionicSlideBoxDelegate.update();
+    //   $ionicSlideBoxDelegate.loop(true)
+    //   $state.transitionTo($state.current, $stateParams, {
+    //     reload: true,
+    //     inherit: false,
+    //     notify: true
+    //   });
+    //   // sharedUtils.hideLoading();
+    // }, 1000);
 
   });
 
@@ -370,15 +376,17 @@ function loadPopularItems(){
       result.push(element);
     });
 
-    $timeout(function(){
-      $scope.popularItems = result;
-      $state.transitionTo($state.current, $stateParams, {
-        reload: true,
-        inherit: false,
-        notify: true
-      });
-      // sharedUtils.hideLoading();
-    }, 1000);
+    $scope.popularItems = result;
+
+    // $timeout(function(){
+    //   $scope.popularItems = result;
+    //   $state.transitionTo($state.current, $stateParams, {
+    //     reload: true,
+    //     inherit: false,
+    //     notify: true
+    //   });
+    //   // sharedUtils.hideLoading();
+    // }, 1000);
 
   });
 }
@@ -396,15 +404,19 @@ function loadAnnouncements(){
       announcements.push(element);
     });
 
-    $timeout(function(){
-      $scope.announcements = announcements;
-      $state.transitionTo($state.current, $stateParams, {
-        reload: true,
-        inherit: false,
-        notify: true
-      });
-      sharedUtils.hideLoading();
-    }, 1000);
+    $scope.announcements = announcements;
+
+    // $timeout(function(){
+    //   $scope.announcements = announcements;
+    //   $state.transitionTo($state.current, $stateParams, {
+    //     reload: true,
+    //     inherit: false,
+    //     notify: true
+    //   });
+    //   sharedUtils.hideLoading();
+    // }, 1000);
+
+    sharedUtils.hideLoading();
 
   });
 }
@@ -1068,7 +1080,7 @@ $window.location.reload(true);
   $rootScope.extras=true;
 
   $scope.mail = function(){
-    window.location.href = 'mailto:minimart.krishna@gmail.com?Subject=Hello%20again';
+    window.location.href = 'mailto:jomthanni@gmail.com?Subject=Hello%20again';
   }
 
   $scope.call = function(){
